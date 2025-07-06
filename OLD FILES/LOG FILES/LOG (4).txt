@@ -1,0 +1,62 @@
+Login successful! API key is correct.
+🚀 Starting Trading Bot with Manual TP/SL Management
+💰 Initial Capital: $200
+⚡ Base Leverage: 10x
+📊 Symbol: BTCUSDT
+⏰ Interval: 1m
+==================================================  
+Leverage set to 10 for BTCUSDT
+
+🔄 --- New Trading Cycle ---
+Can take trade check: h_pos=0, result=True
+the last signal is 2
+a new order would be placed since last signal is 2
+Calculated stoploss for buy: 103426.26250000001
+Calculated take profit for buy: 104470.625125
+ORDER AT 2025-06-21 09:23:35.855426 TYPE : buy
+the entry signal is 2 with current_price 103436.26250000001
+📊 Current Price: $103436.26250000001
+📈 Signal: 2
+🎯 Position Status: h_pos = 0
+📊 RM1 Level: 0
+🎯 Taking BUY trade!
+Position sizing calculation:
+  Capital: $200
+  Leverage: 10x
+  Price: $103436.26250000001
+  Calculated quantity: 0.019335578757981513 BTC
+  Notional value: $2000.0
+Leverage set to 10 for BTCUSDT
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'maxPrice': '809484', 'filterType': 'PRICE_FILTER', 'tickSize': '0.10', 'minPrice': '261.10'}, {'maxQty': '1000', 'filterType': 'LOT_SIZE', 'minQty': '0.001', 'stepSize': '0.001'}, {'stepSize': '0.001', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001', 'maxQty': '1000'}, {'filterType': 'MAX_NUM_ORDERS', 'limit': 200}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+🎯 Trade Details:
+  Direction: BUY
+  Entry Price: $103436.3
+  Stop Loss: $103330.0
+  Take Profit: $103953.4
+  Quantity: 0.019 BTC
+  Leverage: 10x
+  Notional: $1965.2897
+15015.57660131
+📝 Placing position order...
+Order placed successfully {'orderId': 4576409875, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': 'BY06RuP14XBCfahRiwgDCX', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.019', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': 
+False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '0.00', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750487018459}
+✅ Position order placed: 4576409875
+Position set: h_pos = 1 for buy trade
+  Entry: $103436.3, SL: $103330.0, TP: $103953.4
+🔄 Position opened - will monitor in next cycle
+
+📊 System Status:
+  RM1 Level: 0
+  Next Leverage: 10x
+  Capital: $200
+  Position: h_pos = 1
+
+🔄 --- New Trading Cycle ---
+📊 Existing position detected - monitoring...
+🔍 Starting position monitoring (blocking mode)...
+  Direction: buy
+  Entry: $103436.3
+  SL: $103330.0
+  TP: $103953.4
+  Quantity: 0.019

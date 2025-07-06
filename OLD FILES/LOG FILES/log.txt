@@ -1,0 +1,293 @@
+ORDER AT 2025-06-20 18:34:00.761018 TYPE : sell
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'maxPrice': '809484', 'filterType': 'PRICE_FILTER', 'tickSize': '0.10', 'minPrice': '261.10'}, {'maxQty': '1000', 'filterType': 'LOT_SIZE', 'minQty': '0.001', 'stepSize': '0.001'}, {'stepSize': '0.001', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001', 'maxQty': '1000'}, {'filterType': 'MAX_NUM_ORDERS', 'limit': 200}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Prices rounded to 2 decimals - Entry: 104208.16, SL: 104218.16, TP: 101602.96
+Leverage set to 1 for BTCUSDT
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'maxPrice': '809484', 'filterType': 'PRICE_FILTER', 'tickSize': '0.10', 'minPrice': '261.10'}, {'maxQty': '1000', 'filterType': 'LOT_SIZE', 'minQty': '0.001', 'stepSize': '0.001'}, {'stepSize': '0.001', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001', 'maxQty': '1000'}, {'filterType': 'MAX_NUM_ORDERS', 'limit': 200}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Trade amount adjusted to minimum: 0.001
+Symbol info - Min qty: 0.001, Step size: 0.001, Precision: 3
+Raw amount: 9.596177497040539e-05, Adjusted amount: 0.001
+RM1 System - Level: 0, Leverage: 1x
+Capital: 10
+Open SELL trade at 104208.16 | SL: 104218.16 | TP: 101602.96 | Amount: 0.001
+14980.11729400
+Order placed successfully {'orderId': 4572030880, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': '7JlPWJ0kkjkvoqHcsawRHp', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.001', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': 
+False, 'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0.00', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750433644662}
+Position order placed successfully: 4572030880
+Stop Loss Order placed successfully {'orderId': 4572030902, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': '5CjXu3kk5cQpmsRUnduNSA', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.001', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'STOP_MARKET', 'reduceOnly': True, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '104218.16', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'STOP_MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750433645059}
+Order failed: Price not increased by tick size.
+Failed to place SL or TP orders
+Failed to cancel order 4572030880: Unknown order sent.
+RM1 System - Current Level: 0, Next Leverage: 1x
+Current Capital: 10
+Monitoring Active: False
+Cycle complete. Sleeping for next interval...
+
+_______________________________________________________________________________________________________________
+
+--- New Trading Cycle ---
+the last signal is -2
+a new order would be placed since last signal is -2
+Calculated stoploss for sell: 104212.44
+Calculated take profit for sell: 103160.41560000001
+ORDER AT 2025-06-20 18:54:49.613504 TYPE : sell
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'maxPrice': '809484', 'filterType': 'PRICE_FILTER', 'tickSize': '0.10', 'minPrice': '261.10'}, {'maxQty': '1000', 'filterType': 'LOT_SIZE', 'minQty': '0.001', 'stepSize': '0.001'}, {'stepSize': '0.001', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001', 'maxQty': '1000'}, {'filterType': 'MAX_NUM_ORDERS', 'limit': 200}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Prices rounded to 2 decimals - Entry: 104202.44, SL: 104212.44, TP: 101597.38
+Leverage set to 1 for BTCUSDT
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'maxPrice': '809484', 'filterType': 'PRICE_FILTER', 'tickSize': '0.10', 'minPrice': '261.10'}, {'maxQty': '1000', 'filterType': 'LOT_SIZE', 'minQty': '0.001', 'stepSize': '0.001'}, {'stepSize': '0.001', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001', 'maxQty': '1000'}, {'filterType': 'MAX_NUM_ORDERS', 'limit': 200}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Trade amount adjusted to minimum: 0.001
+Symbol info - Min qty: 0.001, Step size: 0.001, Precision: 3
+Raw amount: 9.59670426143572e-05, Adjusted amount: 0.001
+RM1 System - Level: 0, Leverage: 1x
+Capital: 10
+Open SELL trade at 104202.44 | SL: 104212.44 | TP: 101597.38 | Amount: 0.001
+14980.65412687
+Order placed successfully {'orderId': 4572183630, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': 'MYqMaWPnl0ZFfWHpNnhImK', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.001', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': 
+False, 'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0.00', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750434893089}
+Position order placed successfully: 4572183630
+Stop Loss Order placed successfully {'orderId': 4572183718, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': '51dQRpuuTkRJa0P1Bmh36l', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.001', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'STOP_MARKET', 'reduceOnly': True, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '104212.44', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'STOP_MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750434893512}
+Order failed: Price not increased by tick size.
+Failed to place SL or TP orders
+Failed to cancel order 4572183630: Unknown order sent.
+RM1 System - Current Level: 0, Next Leverage: 1x
+Current Capital: 10
+Monitoring Active: False
+Cycle complete. Sleeping for next interval...
+
+_______________________________________________________________________________________________________________
+
+--- New Trading Cycle ---
+the last signal is -1
+a new order would be placed since last signal is -1
+Calculated stoploss for sell: 104123.1175
+Calculated take profit for sell: 103071.98632499999
+ORDER AT 2025-06-20 19:07:20.514451 TYPE : sell
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'maxPrice': '809484', 'filterType': 'PRICE_FILTER', 'tickSize': '0.10', 'minPrice': '261.10'}, {'maxQty': '1000', 'filterType': 'LOT_SIZE', 'minQty': '0.001', 'stepSize': '0.001'}, {'stepSize': '0.001', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001', 'maxQty': '1000'}, {'filterType': 'MAX_NUM_ORDERS', 'limit': 200}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Prices rounded to 2 decimals - Entry: 104113.12, SL: 104123.12, TP: 101510.29
+Leverage set to 1 for BTCUSDT
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'maxPrice': '809484', 'filterType': 'PRICE_FILTER', 'tickSize': '0.10', 'minPrice': '261.10'}, {'maxQty': '1000', 'filterType': 'LOT_SIZE', 'minQty': '0.001', 'stepSize': '0.001'}, {'stepSize': '0.001', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001', 'maxQty': '1000'}, {'filterType': 'MAX_NUM_ORDERS', 'limit': 200}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Trade amount adjusted to minimum: 0.001
+Symbol info - Min qty: 0.001, Step size: 0.001, Precision: 3
+Raw amount: 9.60493739886001e-05, Adjusted amount: 0.001
+RM1 System - Level: 0, Leverage: 1x
+Capital: 10
+Open SELL trade at 104113.12 | SL: 104123.12 | TP: 101510.29 | Amount: 0.001
+14981.48614906
+Order placed successfully {'orderId': 4572274218, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': 'xMbnCLGikTsWZudeEJcTOE', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.001', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': 
+False, 'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0.00', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750435645235}
+Position order placed successfully: 4572274218
+Stop Loss Order placed successfully {'orderId': 4572274249, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': 'Ri1GgvPPQP46lIsrfq6v7w', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.001', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'STOP_MARKET', 'reduceOnly': True, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '104123.12', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'STOP_MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750435645599}
+Order failed: Price not increased by tick size.
+Failed to place SL or TP orders
+Failed to cancel order 4572274218: Unknown order sent.
+RM1 System - Current Level: 0, Next Leverage: 1x
+Current Capital: 10
+Monitoring Active: False
+Cycle complete. Sleeping for next interval...
+
+_______________________________________________________________________________________________________________
+
+--- New Trading Cycle ---
+the last signal is 1
+a new order would be placed since last signal is 1
+Calculated stoploss for buy: 104107.555
+Calculated take profit for buy: 105158.73055
+ORDER AT 2025-06-20 19:19:53.641259 TYPE : buy
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'minPrice': '261.10', 'maxPrice': '809484', 'tickSize': '0.10', 'filterType': 'PRICE_FILTER'}, {'minQty': '0.001', 'stepSize': '0.001', 'maxQty': '1000', 'filterType': 'LOT_SIZE'}, {'stepSize': '0.001', 'maxQty': '1000', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001'}, {'limit': 200, 'filterType': 'MAX_NUM_ORDERS'}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Prices rounded to 2 decimals - Entry: 104117.56, SL: 104081.82, TP: 101514.62
+Leverage set to 1 for BTCUSDT
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'minPrice': '261.10', 'maxPrice': '809484', 'tickSize': '0.10', 'filterType': 'PRICE_FILTER'}, {'minQty': '0.001', 'stepSize': '0.001', 'maxQty': '1000', 'filterType': 'LOT_SIZE'}, {'stepSize': '0.001', 'maxQty': '1000', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001'}, {'limit': 200, 'filterType': 'MAX_NUM_ORDERS'}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Trade amount adjusted to minimum: 0.001
+Symbol info - Min qty: 0.001, Step size: 0.001, Precision: 3
+Raw amount: 9.604527804915905e-05, Adjusted amount: 0.001
+RM1 System - Level: 0, Leverage: 1x
+Capital: 10
+Open SELL trade at 104117.56 | SL: 104081.82 | TP: 101514.62 | Amount: 0.001
+14982.07242853
+Order placed successfully {'orderId': 4572367284, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': '3B5jYXx0Ze8Tnn1UuSX0KO', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.001', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': 
+False, 'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0.00', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750436397351}
+Position order placed successfully: 4572367284
+Stop Loss Order placed successfully {'orderId': 4572367294, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': 'S65D8FbwfW2YLciNtzBLOx', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.001', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'STOP_MARKET', 'reduceOnly': True, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '104081.82', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'STOP_MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750436397717}
+Order failed: Price not increased by tick size.
+Failed to place SL or TP orders
+Failed to cancel order 4572367284: Unknown order sent.
+RM1 System - Current Level: 0, Next Leverage: 1x
+Current Capital: 10
+Monitoring Active: False
+Cycle complete. Sleeping for next interval...
+
+_______________________________________________________________________________________________________________
+
+--- New Trading Cycle ---
+the last signal is 2
+a new order would be placed since last signal is 2
+Calculated stoploss for buy: 104190.5875
+Calculated take profit for buy: 105242.593375
+ORDER AT 2025-06-20 19:25:09.515050 TYPE : buy
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'maxPrice': '809484', 'filterType': 'PRICE_FILTER', 'tickSize': '0.10', 'minPrice': '261.10'}, {'maxQty': '1000', 'filterType': 'LOT_SIZE', 'minQty': '0.001', 'stepSize': '0.001'}, {'stepSize': '0.001', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001', 'maxQty': '1000'}, {'filterType': 'MAX_NUM_ORDERS', 'limit': 200}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Prices rounded to 2 decimals - Entry: 104200.59, SL: 104050.5, TP: 101595.57
+Leverage set to 1 for BTCUSDT
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'maxPrice': '809484', 'filterType': 'PRICE_FILTER', 'tickSize': '0.10', 'minPrice': '261.10'}, {'maxQty': '1000', 'filterType': 'LOT_SIZE', 'minQty': '0.001', 'stepSize': '0.001'}, {'stepSize': '0.001', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001', 'maxQty': '1000'}, {'filterType': 'MAX_NUM_ORDERS', 'limit': 200}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Trade amount adjusted to minimum: 0.001
+Symbol info - Min qty: 0.001, Step size: 0.001, Precision: 3
+Raw amount: 9.596874643416127e-05, Adjusted amount: 0.001
+RM1 System - Level: 0, Leverage: 1x
+Capital: 10
+Open SELL trade at 104200.59 | SL: 104050.5 | TP: 101595.57 | Amount: 0.001
+14982.65641280
+Order placed successfully {'orderId': 4572410657, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': 'VqEisQ56Lp9lohltLfhMCo', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.001', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': 
+False, 'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0.00', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750436713177}
+Position order placed successfully: 4572410657
+Stop Loss Order failed: Order would immediately trigger.
+Order failed: Price not increased by tick size.
+Failed to place SL or TP orders
+Failed to cancel order 4572410657: Unknown order sent.
+RM1 System - Current Level: 0, Next Leverage: 1x
+Current Capital: 10
+Monitoring Active: False
+Cycle complete. Sleeping for next interval...
+
+_______________________________________________________________________________________________________________
+
+--- New Trading Cycle ---
+the last signal is 2
+a new order would be placed since last signal is 2
+Calculated stoploss for buy: 104225.1925
+Calculated take profit for buy: 105277.544425
+ORDER AT 2025-06-20 19:26:16.311570 TYPE : buy
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'minPrice': '261.10', 'maxPrice': '809484', 'tickSize': '0.10', 'filterType': 'PRICE_FILTER'}, {'minQty': '0.001', 'stepSize': '0.001', 'maxQty': '1000', 'filterType': 'LOT_SIZE'}, {'stepSize': '0.001', 'maxQty': '1000', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001'}, {'limit': 200, 'filterType': 'MAX_NUM_ORDERS'}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Prices rounded to 2 decimals - Entry: 104235.19, SL: 104206.77, TP: 101629.31
+Leverage set to 1 for BTCUSDT
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'maxPrice': '809484', 'filterType': 'PRICE_FILTER', 'tickSize': '0.10', 'minPrice': '261.10'}, {'maxQty': '1000', 'filterType': 'LOT_SIZE', 'minQty': '0.001', 'stepSize': '0.001'}, {'stepSize': '0.001', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001', 'maxQty': '1000'}, {'filterType': 'MAX_NUM_ORDERS', 'limit': 200}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Trade amount adjusted to minimum: 0.001
+Symbol info - Min qty: 0.001, Step size: 0.001, Precision: 3
+Raw amount: 9.593689041100227e-05, Adjusted amount: 0.001
+RM1 System - Level: 0, Leverage: 1x
+Capital: 10
+Open SELL trade at 104235.19 | SL: 104206.77 | TP: 101629.31 | Amount: 0.001
+14982.61477228
+Order placed successfully {'orderId': 4572421157, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': 'YMS0Rn6cGbIlEmIY69IFoO', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.001', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': 
+False, 'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0.00', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750436779867}
+Position order placed successfully: 4572421157
+Stop Loss Order placed successfully {'orderId': 4572421202, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': 'IPAO0jSo35vQjarQtUpYYq', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.001', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'STOP_MARKET', 'reduceOnly': True, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '104206.77', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'STOP_MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750436780263}
+Order failed: Price not increased by tick size.
+Failed to place SL or TP orders
+Failed to cancel order 4572421157: Unknown order sent.
+RM1 System - Current Level: 0, Next Leverage: 1x
+Current Capital: 10
+Monitoring Active: False
+Cycle complete. Sleeping for next interval...
+
+_______________________________________________________________________________________________________________
+
+--- New Trading Cycle ---
+the last signal is -2
+a new order would be placed since last signal is -2
+Calculated stoploss for sell: 103994.1075
+Calculated take profit for sell: 102944.266425
+ORDER AT 2025-06-20 19:39:50.513437 TYPE : sell
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'minPrice': '261.10', 'maxPrice': '809484', 'tickSize': '0.10', 'filterType': 'PRICE_FILTER'}, {'minQty': '0.001', 'stepSize': '0.001', 'maxQty': '1000', 'filterType': 'LOT_SIZE'}, {'stepSize': '0.001', 'maxQty': '1000', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001'}, {'limit': 200, 'filterType': 'MAX_NUM_ORDERS'}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Prices rounded to 2 decimals - Entry: 103984.11, SL: 103994.11, TP: 101384.5
+Leverage set to 1 for BTCUSDT
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'maxPrice': '809484', 'filterType': 'PRICE_FILTER', 'tickSize': '0.10', 'minPrice': '261.10'}, {'maxQty': '1000', 'filterType': 'LOT_SIZE', 'minQty': '0.001', 'stepSize': '0.001'}, {'stepSize': '0.001', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001', 'maxQty': '1000'}, {'filterType': 'MAX_NUM_ORDERS', 'limit': 200}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Trade amount adjusted to minimum: 0.001
+Symbol info - Min qty: 0.001, Step size: 0.001, Precision: 3
+Raw amount: 9.616853959705958e-05, Adjusted amount: 0.001
+RM1 System - Level: 0, Leverage: 1x
+Capital: 10
+Open SELL trade at 103984.11 | SL: 103994.11 | TP: 101384.5 | Amount: 0.001
+14982.57310516
+Order placed successfully {'orderId': 4572506911, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': '3hFAL0PnAPao9yMZ8zDflx', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.001', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': 
+False, 'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0.00', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750437593964}
+Position order placed successfully: 4572506911
+Stop Loss Order failed: Order would immediately trigger.
+Order placed successfully {'orderId': 4572506956, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': 'E46LPq9svmpeVIDRquuHko', 'price': '101384.50', 'avgPrice': '0.00', 'origQty': '0.001', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'LIMIT', 'reduceOnly': True, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '0.00', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'LIMIT', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750437594678}
+Failed to place SL or TP orders
+Failed to cancel order 4572506911: Unknown order sent.
+RM1 System - Current Level: 0, Next Leverage: 1x
+Current Capital: 10
+Monitoring Active: False
+Cycle complete. Sleeping for next interval...
+
+_______________________________________________________________________________________________________________
+
+--- New Trading Cycle ---
+the last signal is 1
+a new order would be placed since last signal is 1
+Calculated stoploss for buy: 103702.01999999999
+Calculated take profit for buy: 104749.1402
+ORDER AT 2025-06-20 19:52:21.206436 TYPE : buy
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'maxPrice': '809484', 'filterType': 'PRICE_FILTER', 'tickSize': '0.10', 'minPrice': '261.10'}, {'maxQty': '1000', 'filterType': 'LOT_SIZE', 'minQty': '0.001', 'stepSize': '0.001'}, {'stepSize': '0.001', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001', 'maxQty': '1000'}, {'filterType': 'MAX_NUM_ORDERS', 'limit': 200}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Prices rounded to 2 decimals - Entry: 103712.02, SL: 103703.62, TP: 101119.22
+Leverage set to 1 for BTCUSDT
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': [{'maxPrice': '809484', 'filterType': 'PRICE_FILTER', 'tickSize': '0.10', 'minPrice': '261.10'}, {'maxQty': '1000', 'filterType': 'LOT_SIZE', 'minQty': '0.001', 'stepSize': '0.001'}, {'stepSize': '0.001', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001', 'maxQty': '1000'}, {'filterType': 'MAX_NUM_ORDERS', 'limit': 200}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 
+'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Trade amount adjusted to minimum: 0.001
+Symbol info - Min qty: 0.001, Step size: 0.001, Precision: 3
+Raw amount: 9.642083916599059e-05, Adjusted amount: 0.001
+RM1 System - Level: 0, Leverage: 1x
+Capital: 10
+Open SELL trade at 103712.02 | SL: 103703.62 | TP: 101119.22 | Amount: 0.001
+14982.53150509
+Order placed successfully {'orderId': 4572599260, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': 'S9guQIgaucWA76JdHLh8zF', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.001', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': 
+False, 'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0.00', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750438345712}
+Position order placed successfully: 4572599260
+Stop Loss Order placed successfully {'orderId': 4572599424, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': '5C6COMFZa1oKPneA8WyZZl', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.001', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'STOP_MARKET', 'reduceOnly': True, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '103703.62', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'STOP_MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750438346067}
+Order failed: Price not increased by tick size.
+Failed to place SL or TP orders
+Failed to cancel order 4572599260: Unknown order sent.
+RM1 System - Current Level: 0, Next Leverage: 1x
+Current Capital: 10
+Monitoring Active: False
+Cycle complete. Sleeping for next interval...
+
+_______________________________________________________________________________________________________________
+
+--- New Trading Cycle ---
+the last signal is -2
+a new order would be placed since last signal is -2
+Calculated stoploss for sell: 103100.595
+Calculated take profit for sell: 102059.68905      
+ORDER AT 2025-06-20 21:28:36.763881 TYPE : sell    
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': 
+[{'minPrice': '261.10', 'maxPrice': '809484', 'tickSize': '0.10', 'filterType': 'PRICE_FILTER'}, {'minQty': '0.001', 'stepSize': '0.001', 'maxQty': '1000', 'filterType': 'LOT_SIZE'}, 
+{'stepSize': '0.001', 'maxQty': '1000', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001'}, {'limit': 200, 'filterType': 'MAX_NUM_ORDERS'}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 
+'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Prices rounded to 2 decimals - Entry: 103090.6, SL: 103100.6, TP: 100513.33
+Leverage set to 1 for BTCUSDT
+{'symbol': 'BTCUSDT', 'pair': 'BTCUSDT', 'contractType': 'PERPETUAL', 'deliveryDate': 4133404802000, 'onboardDate': 1569398400000, 'status': 'TRADING', 'maintMarginPercent': '2.5000', 'requiredMarginPercent': '5.0000', 'baseAsset': 'BTC', 'quoteAsset': 'USDT', 'marginAsset': 'USDT', 'pricePrecision': 2, 'quantityPrecision': 3, 'baseAssetPrecision': 8, 'quotePrecision': 8, 'underlyingType': 'COIN', 'underlyingSubType': [], 'triggerProtect': '0.0500', 'liquidationFee': '0.020000', 'marketTakeBound': '0.30', 'maxMoveOrderLimit': 1000, 'filters': 
+[{'maxPrice': '809484', 'filterType': 'PRICE_FILTER', 'tickSize': '0.10', 'minPrice': '261.10'}, {'maxQty': '1000', 'filterType': 'LOT_SIZE', 'minQty': '0.001', 'stepSize': '0.001'}, 
+{'stepSize': '0.001', 'filterType': 'MARKET_LOT_SIZE', 'minQty': '0.001', 'maxQty': '1000'}, {'filterType': 'MAX_NUM_ORDERS', 'limit': 200}, {'filterType': 'MAX_NUM_ALGO_ORDERS', 'limit': 10}, {'filterType': 'MIN_NOTIONAL', 'notional': '100'}, {'filterType': 'PERCENT_PRICE', 'multiplierUp': '1.5000', 'multiplierDown': '0.5000', 'multiplierDecimal': '4'}, {'filterType': 'POSITION_RISK_CONTROL', 'positionControlSide': 'NONE'}], 'orderTypes': ['LIMIT', 'MARKET', 'STOP', 'STOP_MARKET', 'TAKE_PROFIT', 'TAKE_PROFIT_MARKET', 'TRAILING_STOP_MARKET'], 
+'timeInForce': ['GTC', 'IOC', 'FOK', 'GTX', 'GTD'], 'permissionSets': ['GRID', 'COPY']}
+Symbol info - Min qty: 0.001, Step size: 0.001, Precision: 3
+Raw amount: 0.09700205450351437, Adjusted amount: 0.097
+RM1 System - Level: 0, Leverage: 1x
+Capital: 10000
+Open SELL trade at 103090.6 | SL: 103100.6 | TP: 100513.33 | Amount: 0.097
+14985.99733045
+Order placed successfully {'orderId': 4573563838, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': 'Ku5ELkQDFOSatBvNK5Bm0J', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.097', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'MARKET', 'reduceOnly': False, 'closePosition': False, 'side': 'SELL', 'positionSide': 'BOTH', 'stopPrice': '0.00', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750444122024}
+Position order placed successfully: 4573563838
+Stop Loss Order placed successfully {'orderId': 4573563847, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': 'sTcM3aV6jKPWhVjwZfc0aG', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.097', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'STOP_MARKET', 'reduceOnly': True, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '103100.60', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'STOP_MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750444122387}
+Order failed: Price not increased by tick size.
+STOP LOSS ORDER RESPONSE : {'orderId': 4573563847, 'symbol': 'BTCUSDT', 'status': 'NEW', 'clientOrderId': 'sTcM3aV6jKPWhVjwZfc0aG', 'price': '0.00', 'avgPrice': '0.00', 'origQty': '0.097', 'executedQty': '0.000', 'cumQty': '0.000', 'cumQuote': '0.00000', 'timeInForce': 'GTC', 'type': 'STOP_MARKET', 'reduceOnly': True, 'closePosition': False, 'side': 'BUY', 'positionSide': 'BOTH', 'stopPrice': '103100.60', 'workingType': 'CONTRACT_PRICE', 'priceProtect': False, 'origType': 'STOP_MARKET', 'priceMatch': 'NONE', 'selfTradePreventionMode': 'EXPIRE_MAKER', 'goodTillDate': 0, 'updateTime': 1750444122387}
+TAKE PROFIT ORDER RESPONSE : None
+Failed to place SL or TP orders
+Failed to cancel order 4573563838: Unknown order sent.
+RM1 System - Current Level: 0, Next Leverage: 1x
+Current Capital: 10000
+Monitoring Active: False
+Cycle complete. Sleeping for next interval...
