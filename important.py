@@ -166,6 +166,18 @@ def calculate_signals(df):
         df.rename(columns={'close':'Close','open':'Open','high':'High','low':'Low','volume':'Volume'},inplace=True)
         if MASTER_HEIKEN_CHOICE == 1:
             calculate_heiken_ashi(df)
+        high = df['High']
+        low = df['Low']
+        close = df['Close']
+        prev_close = close.shift(1)
+
+        tr1 = high - low
+        tr2 = (high - prev_close).abs()
+        tr3 = (low - prev_close).abs()
+        true_range = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+
+        atr_period = 14
+        df['atr'] = true_range.rolling(window=atr_period).mean()
         df = rf.run_filter(df)
         # df['gaizy_color'] = self.Grsi.calculate_signals(df=df)
         df.rename(columns={'Close':'close','Open':'open','High':'high','Low':'low','Volume':'volume'},inplace=True)

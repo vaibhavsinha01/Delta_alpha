@@ -4,7 +4,7 @@
 BINANCE_API_KEY = '1337874f97ecf53736b7bfa8f68db40fa20441fc441feb181a76d082dfbf6f15'  # Your Binance API key
 BINANCE_API_SECRET = '1f9ee8e187873426d7583734d0cd0661a0c1e0281ef0d9bf66013ade515d48d9'  # Your Binance API secret
 BINANCE_SYMBOL = 'ETHUSDT'  # Trading pair - changed from BTCUSDT
-BINANCE_INTERVAL = '5m'  # Candle interval
+BINANCE_INTERVAL = '15m'  # Candle interval
 BINANCE_TESTNET_STATUS = 1 # use this to trade on the testnet and set the value to 0 to trade on the mainnet , remainder that there are separate api_keys,api_secrets for the binance_testnet_status
 
 # Don't change the variables here they have nothing to do with the values in the code in main file
@@ -103,8 +103,8 @@ DELTA_MIN_LOT = 0.01
 DELTA_BASE_LEVERAGE = 10 
 DELTA_FAKE_LOSS_MAX_AMOUNT = 10
 DELTA_INTERVAL = "15m" 
-DELTA_SL_BUFFER_POINTS = 9
-DELTA_TP_PERCENT = 0.55
+DELTA_SL_BUFFER_POINTS = 15
+DELTA_TP_PERCENT = 1.0
 DELTA_INITIAL_CAPITAL = 850
 
 """

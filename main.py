@@ -9,6 +9,7 @@ from module.rsi_buy_sell import RSIBuySellIndicator
 from binance_client_ import BinanceClient
 from important import *
 import warnings
+from websocket_data_binance import WebsocketClass
 
 # Suppress specific FutureWarnings from pandas
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -23,18 +24,24 @@ class RiskManager:
 
     def calculate_sl_tp(self, entry_price, direction, prev_row, second_last_row):
         try:
+            ATR_TP_FACTOR = 1
+            ATR_SL_FACTOR = 1
             if direction == 'buy':
-                sl = max(
-                    second_last_row['low'],
-                    entry_price - self.sl_buffer_points
-                )
-                tp = entry_price * (1 + self.tp_percent/100)
+                # sl = max(
+                #     second_last_row['low'],
+                #     entry_price - self.sl_buffer_points
+                # )
+                # tp = entry_price * (1 + self.tp_percent/100)
+                sl = entry_price - prev_row['atr']*ATR_SL_FACTOR
+                tp = entry_price + prev_row['atr']*ATR_TP_FACTOR
             else:  # sell
-                sl = min(
-                    second_last_row['high'],
-                    entry_price + self.sl_buffer_points
-                )
-                tp = entry_price * (1 - self.tp_percent/100)
+                # sl = min(
+                #     second_last_row['high'],
+                #     entry_price + self.sl_buffer_points
+                # )
+                # tp = entry_price * (1 - self.tp_percent/100)
+                sl = entry_price + prev_row['atr']*ATR_SL_FACTOR
+                tp = entry_price - prev_row['atr']*ATR_TP_FACTOR
             return round(sl,2), round(tp,2)
         except Exception as e:
             print(f"Error calculating SL/TP: {e}")
@@ -389,6 +396,9 @@ class MartingaleManager:
     def get_current_price(self, symbol):
         """Get current price of the symbol"""
         try:
+            ws_price = websocket_client.get_latest_price()
+            if ws_price is not None:
+                return ws_price
             klines = binance_client.get_klines(BINANCE_SYMBOL,interval=BINANCE_INTERVAL,limit=1)
             if klines and len(klines) > 0:
                 return float(klines[0][4])  # Close price
@@ -396,7 +406,6 @@ class MartingaleManager:
         except Exception as e:
             print(f"Error getting current price: {e}")
             return None
-
 
 # Initialize components
 try:
@@ -406,6 +415,8 @@ try:
     binance_client = BinanceClient(BINANCE_API_KEY, BINANCE_API_SECRET, testnet=1)
     binance_client.login()
     risk_manager = RiskManager(SL_BUFFER_POINTS, TP_PERCENT, INITIAL_CAPITAL)
+    websocket_client = WebsocketClass()
+    websocket_client.start_websocket()
 
     # Initialize Martingale Manager with RM1 system
     base_capital = INITIAL_CAPITAL  # X money - fixed amount per trade
@@ -529,7 +540,8 @@ if __name__ == "__main__":
 
                         last_candle = df.iloc[-1]
                         entry_signal = last_candle['Signal_Final']
-                        current_price = last_candle['close']
+                        # current_price = last_candle['close']
+                        current_price = websocket_client.get_latest_price()
                         print(f"the entry signal is {entry_signal} with current_price {current_price}")
                         
                         # Process latest signal

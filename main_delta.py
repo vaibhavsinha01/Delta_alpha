@@ -1222,11 +1222,11 @@ if __name__ == "__main__":
                                     except Exception as e:
                                         print(f"Initial bracket order failed {e}")
                                         if direction.lower() == 'buy':
-                                            sl = round(sl-1.5,2)
-                                            tp = round(tp+1.5,2)
+                                            sl = round(sl-15,2)
+                                            tp = round(tp+5,2)
                                         elif direction.lower() == 'sell':
-                                            sl = round(sl+1.5,2)
-                                            tp = round(tp-1.5,2)
+                                            sl = round(sl+15,2)
+                                            tp = round(tp-5,2)
                                         else:
                                             print(f"Invalid direction {direction}")
                                         
