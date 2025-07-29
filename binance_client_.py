@@ -36,6 +36,13 @@ class BinanceClient:
         
         df = pd.DataFrame(data, columns=columns)
         df = df[['time', 'open', 'high', 'low', 'close', 'volume']]  # Keep only relevant columns
+        df['time'] = df['time'].astype(int)
+        df['open'] = df['open'].astype(float)
+        df['high'] = df['high'].astype(float)
+        df['low'] = df['low'].astype(float)
+        df['close'] = df['close'].astype(float)
+        df['volume'] = df['volume'].astype(float)
+
         return df
     
     def get_symbol_info(self, symbol):
@@ -281,7 +288,7 @@ if __name__ == "__main__":
     api_key = '1ff87751c4a5a314b617856c252f342ee4aeff38797361ab676088330b1c26b1'  # Your Binance API key
     api_secret_key = '4a924ff228b870e760d42891db0a6b50a61139453232de53d7b80b7d3a7744ef'  # Your Binance API secret
 
-    client = BinanceClient(api_key, api_secret_key)
+    client = BinanceClient(api_key, api_secret_key,testnet=0)
     # client.set_leverage(symbol='ETHUSD.P',leverage=50)
     res = client.get_klines(symbol='ETHUSDT',interval='15m',limit=100)
     print(res)

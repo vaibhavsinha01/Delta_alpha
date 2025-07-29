@@ -169,29 +169,29 @@ class DeltaBroker:
         """Get current market price"""
         try:
             last = self.df.iloc[-1]
-            return last['close']
+            return float(last['close'])
         except Exception as e:
             last = self.df.iloc[-1]
-            return last['Close']
+            return float(last['Close'])
         
     def get_market_price(self):
         try:
             # df = self.fetch_data() # HERE I AM FETCHING DATA FROM BINANCE BECAUSE THE DATA FROM DELTA EXCHANGE IS GIVING A LAG OF 1 MINUTE
             df = self.fetch_data_binance()
             last_row = df.iloc[-1]
-            last_price = last_row['close']
+            last_price = float(last_row['close'])
             return last_price
         except Exception as e:
             try:
                 df = self.fetch_data_binance() # HERE I AM FETCHING DATA FROM BINANCE BECAUSE THE DATA FROM DELTA EXCHANGE IS GIVING A LAG OF 1 MINUTE
                 last_row = df.iloc[-1]
-                last_price = last_row['Close']
+                last_price = float(last_row['Close'])
                 return last_price
             except Exception as e:
                 try:
-                    return self.df.iloc[-1]['close']
+                    return float(self.df.iloc[-1]['close'])
                 except Exception as e:
-                    return self.df.iloc[-1]['Close']
+                    return float(self.df.iloc[-1]['Close'])
 
     def get_active_positions(self):
         """Get active positions from Delta Exchange for ETHUSD (product_id: 1699)""" # 1699 for testnet/3136 for the mainnet
@@ -429,30 +429,41 @@ class RiskManager:
 
     def calculate_sl_tp(self, entry_price, direction, prev_row, second_last_row):
         try:
+            entry_price = float(entry_price)
+            sl_buffer = float(self.sl_buffer_points)
+            tp_percent = float(self.tp_percent)
+            second_low = float(second_last_row['low'])
+            second_high = float(second_last_row['high'])
+
             if direction == 'buy':
-                sl = max(
-                    int(second_last_row['low']),
-                    int(entry_price) - int(self.sl_buffer_points)
-                )
-                tp = int(entry_price * (1 + self.tp_percent/100))
+                sl = max(second_low, entry_price - sl_buffer)
+                tp = entry_price * (1 + tp_percent / 100)
             else:  # sell
-                sl = min(
-                    int(second_last_row['high']),
-                    int(entry_price) + int(self.sl_buffer_points)
-                )
-                tp = int(entry_price) * (1 - self.tp_percent/100)
-            return round(sl, 2), round(tp, 2)
-        except Exception as e:
-            print(f"Error calculating SL/TP: {e}")
-            # Fallback values
-            if direction == 'buy':
-                sl = entry_price - self.sl_buffer_points
-                tp = entry_price * (1 + self.tp_percent/100)
-            else:
-                sl = entry_price + self.sl_buffer_points
-                tp = entry_price * (1 - self.tp_percent/100)
+                sl = min(second_high, entry_price + sl_buffer)
+                tp = entry_price * (1 - tp_percent / 100)
+
             return round(sl, 2), round(tp, 2)
 
+        except Exception as e:
+            print(f"Error calculating SL/TP: {e}")
+            # Fallback logic
+            try:
+                entry_price = float(entry_price)
+                sl_buffer = float(self.sl_buffer_points)
+                tp_percent = float(self.tp_percent)
+
+                if direction == 'buy':
+                    sl = entry_price - sl_buffer
+                    tp = entry_price * (1 + tp_percent / 100)
+                else:
+                    sl = entry_price + sl_buffer
+                    tp = entry_price * (1 - tp_percent / 100)
+
+                return round(sl, 2), round(tp, 2)
+
+            except Exception as e_inner:
+                print(f"Fallback also failed: {e_inner}")
+                return None, None
 
 class MartingaleManager:
     def __init__(self, base_capital, base_leverage=1):
@@ -1175,8 +1186,9 @@ if __name__ == "__main__":
 
                         # Check for entry signal
                         if entry_signal in DESIRED_TYPES and entry_signal != 0:
+                        # if 1==1:
                             try:
-                                delta_client.current_candle_time = df.iloc[-1]['time'] # placing getting time before anything
+                                delta_client.current_candle_time = int(df.iloc[-1]['time']) # placing getting time before anything
                                 direction = "buy" if int(entry_signal) > 0 else "sell"
                                 print(f"🎯 Taking {direction.upper()} trade!")
 
@@ -1186,8 +1198,10 @@ if __name__ == "__main__":
                                 prev_row = df.iloc[i-1]
                                 second_last_row = df.iloc[i-2] if i > 1 else prev_row
 
-                                entry_price = current_price
+                                entry_price = int(current_price)
                                 sl, tp = risk_manager.calculate_sl_tp(entry_price, direction, prev_row, second_last_row)
+                                sl = float(sl)
+                                tp = float(tp)
                                 
                                 # Get current leverage and calculate trade size
                                 current_leverage = martingale_manager.get_leverage()
