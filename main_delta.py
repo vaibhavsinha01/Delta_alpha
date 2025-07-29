@@ -233,8 +233,48 @@ class DeltaBroker:
                 return True
                 
         except Exception as e:
-            print(f"Error getting active positions: {e}")
-            return None
+            # print(f"Error getting active positions: {e}")
+            import time
+            time.sleep(10)
+            try:
+                method = "GET"
+                path = "/v2/positions"
+                url = self.base_url + path
+                timestamp = str(int(time.time()))
+                
+                # Build query parameters for ETHUSD
+                params = {'product_id': str(DELTA_TOKEN)}
+                
+                # Build query string
+                query_string = '&'.join([f"{k}={v}" for k, v in params.items()])
+                
+                # Create signature data - ADD '?' before query_string for GET requests with params
+                signature_data = method + timestamp + path + '?' + query_string
+                signature = self.generate_signature(self.api_secret, signature_data)
+                
+                headers = {
+                    "api-key": self.api_key,
+                    "timestamp": timestamp,
+                    "signature": signature,
+                    "User-Agent": "python-rest-client"
+                }
+                
+                # Make the request with query parameters
+                response = requests.get(url, headers=headers, params=params)
+                
+                positions_data = response.json()
+                print(f"response is {response}")
+                # Print the full response for debugging
+                print("Active Positions Response:", positions_data)
+                print(f"Current size of positions is: {positions_data['result']['size']}")
+
+                if int(abs(positions_data['result']['size']))>0:
+                    return False
+                else:
+                    return True
+            except Exception as e:
+                print(f"error in getting active position in retry :{e}")
+                return None
     
     def get_order_status(self, order_id):
         """Get order status"""
@@ -354,8 +394,44 @@ class DeltaBroker:
                 return False
 
         except Exception as e:
-            print(f"Error in set_leverage: {e}")
-            return False
+            import time
+            time.sleep(10)
+            print(f"sleeping for 10 seconds because and exception in setting leverage has occured")
+            try:
+                method = "POST"
+                path = f"/v2/products/{self.product_id}/orders/leverage"
+                url = self.base_url + path
+                timestamp = str(int(time.time()))
+
+                payload = {"leverage": str(leverage)}
+                payload_json = json.dumps(payload, separators=(',', ':'))
+                signature_data = method + timestamp + path + payload_json
+                signature = self.generate_signature(self.api_secret, signature_data)
+
+                headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'api-key': self.api_key,
+                    'timestamp': timestamp,
+                    'signature': signature,
+                    'User-Agent': 'custom-python-client/1.0'
+                }
+
+                response = requests.post(url, headers=headers, data=payload_json)
+                print(f"Set Leverage status: {response.status_code}")
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    print("Leverage set successfully:", result)
+                    return True
+                else:
+                    print(response.json())
+                    print(response)
+                    print("Failed to set leverage")
+                    return False
+            except Exception as e:
+                print(f"Error in set_leverage: {e}")
+                return None
 
     def connect(self):
         """Initialize connection"""
@@ -586,12 +662,12 @@ class MartingaleManager:
 
                     # Still open
                     print(f"📈 Order still open... TP state: {current_bracket_state_tp}, SL state: {current_bracket_state_sl}")
-                    time.sleep(2)
+                    time.sleep(7)
                     continue
 
                 except Exception as e:
-                    print(f"⚠️ Error in position monitoring loop: {e}")
-                    time.sleep(2)
+                    print(f"Error in position monitoring loop: {e}")
+                    time.sleep(7)
                     continue
 
             return True
@@ -699,6 +775,9 @@ def fake_trade_loss_checker(df, current_time):
 
                         # Reset trade tracking
                         reset_trade_tracking()
+                        import time
+                        print(f"sleeping for 120 seconds to prevent re-entry")
+                        time.sleep(120)
                         return True
                     else:
                         print("✅ Signal is still valid. No fake trade.")
@@ -1327,8 +1406,8 @@ if __name__ == "__main__":
                     print(f"Error displaying status: {status_e}")
                 
                 # Sleep between cycles
-                print(f"💤 Sleeping for {1} seconds...")
-                time.sleep(1)
+                print(f"💤 Sleeping for {3} seconds...")
+                time.sleep(3)
             else:
                 print("Outside trading hours, sleeping...")
                 time.sleep(60)  # Sleep 5 minutes when outside trading hours

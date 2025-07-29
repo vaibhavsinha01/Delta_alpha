@@ -6,7 +6,7 @@
 BINANCE_API_KEY = "34nj4RR3uMcECFaa8OIf6v4zSls2MzqmT952KpWVf2TmWSXPznJFKzFjh3555JgT"
 BINANCE_API_SECRET = "GMBWYiKYfrnRMyAzBVQzVQ3pNyXZovQSIUhN1c69oszwmaY5LPSvQbV7qhjiweq5"
 BINANCE_SYMBOL = 'ETHUSDT'  # Trading pair - changed from BTCUSDT
-BINANCE_INTERVAL = '15m'  # Candle interval
+BINANCE_INTERVAL = '1m'  # Candle intervals
 BINANCE_TESTNET_STATUS = 0 # use this to trade on the testnet and set the value to 0 to trade on the mainnet , remainder that there are separate api_keys,api_secrets for the binance_testnet_status
 
 # Don't change the variables here they have nothing to do with the values in the code in main file
@@ -46,8 +46,8 @@ MASTER_HEIKEN_CHOICE = 1
 # DESIRED_TYPES = [1,2,3,-1,-2,-3]
 # DESIRED_TYPES = [-1,-2,-3] # only take sell trades 
 # DESIRED_TYPES = [1,2,3] # only take buy trades
-# DESIRED_TYPES = [1,2,3,-1,-2,-3]
-DESIRED_TYPES = [2,-2]
+DESIRED_TYPES = [1,2,3,-1,-2,-3]
+# DESIRED_TYPES = [2,-2]
 """
 Configuration File - `config.py`
 Important Note -> always ensure that the code is saved properly CTRL+S before exiting
@@ -95,18 +95,20 @@ Important Note -> always ensure that the code is saved properly CTRL+S before ex
 # CONFIG FOR THE DELTA EXCHANGE
 
 # DELTA_API_KEY = "lOZPIu6tVprsfrLRKM6cyssjX9xVLY"
-DELTA_API_KEY = "BfUCEIS1HuMEVorlB58A7ZIGrxBjGZ"
+# DELTA_API_KEY = "BfUCEIS1HuMEVorlB58A7ZIGrxBjGZ"
+DELTA_API_KEY = "0EcBXCvWDj7DoJ7KGk1neDNxJA9FFE"
 # DELTA_API_SECRET = "sHylfG8esKDwVfn6a9XK8Tx1ogRdhOjzUoKSbbqll69sC2Pix7SP58c2joUu" 
-DELTA_API_SECRET = "MP3D6f26Aue6UdXfa2oitSONCh6L3FutnuuoIdY2YZlztMwUkFbtRBlEBMma"
+# DELTA_API_SECRET = "MP3D6f26Aue6UdXfa2oitSONCh6L3FutnuuoIdY2YZlztMwUkFbtRBlEBMma"
+DELTA_API_SECRET = "aO8Jr4PmcQi4lUiYm6y4qzuEGBdrq3oSYgsOUnChWDr3DZXlYzbSN2UbymBH"
 DELTA_SYMBOL = "ETHUSD" # use ETHUSDT when using binance to fetch and use ETHUSD when using the delta-exchange to fetch
 DELTA_SYMBOL_PLACE_ORDER = "ETHUSD" # used for placing order
 DELTA_TOKEN = 3136 
 DELTA_MIN_LOT = 0.01
 DELTA_BASE_LEVERAGE = 10 
-DELTA_FAKE_LOSS_MAX_AMOUNT = 10
-DELTA_INTERVAL = "15m" 
-DELTA_SL_BUFFER_POINTS = 15
-DELTA_TP_PERCENT = 0.65
+DELTA_FAKE_LOSS_MAX_AMOUNT = 2
+DELTA_INTERVAL = "1m" 
+DELTA_SL_BUFFER_POINTS = 10
+DELTA_TP_PERCENT = 0.3
 DELTA_INITIAL_CAPITAL = 850
 
 """
