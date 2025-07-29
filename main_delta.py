@@ -431,16 +431,16 @@ class RiskManager:
         try:
             if direction == 'buy':
                 sl = max(
-                    second_last_row['low'],
-                    entry_price - self.sl_buffer_points
+                    int(second_last_row['low']),
+                    int(entry_price) - int(self.sl_buffer_points)
                 )
-                tp = entry_price * (1 + self.tp_percent/100)
+                tp = int(entry_price * (1 + self.tp_percent/100))
             else:  # sell
                 sl = min(
-                    second_last_row['high'],
-                    entry_price + self.sl_buffer_points
+                    int(second_last_row['high']),
+                    int(entry_price) + int(self.sl_buffer_points)
                 )
-                tp = entry_price * (1 - self.tp_percent/100)
+                tp = int(entry_price) * (1 - self.tp_percent/100)
             return round(sl, 2), round(tp, 2)
         except Exception as e:
             print(f"Error calculating SL/TP: {e}")
