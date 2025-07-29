@@ -164,6 +164,14 @@ def calculate_takeprofit( entry_price, side):
 def calculate_signals(df):
     try:
         df.rename(columns={'close':'Close','open':'Open','high':'High','low':'Low','volume':'Volume'},inplace=True)
+        # here i have added 2 lines because now we are fetching data from the binance instead of the delta exchange so we have to change the values from str to int
+        # Convert string columns to numeric
+        numeric_columns = ['Open', 'High', 'Low', 'Close', 'Volume']
+        for col in numeric_columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+
+        # Remove any rows with NaN values
+        df = df.dropna()
         if MASTER_HEIKEN_CHOICE == 1:
             calculate_heiken_ashi(df)
         high = df['High']
@@ -430,6 +438,7 @@ def calculate_signals(df):
         return df
     except Exception as e:
         print(f"Error occured in calculating the signal : {e}")
+        return df
 
 def execute_signals(df):
     try:

@@ -8,7 +8,7 @@ import hashlib
 from utils.binance_client import BinanceClient as Client
 
 class BinanceClient:
-    def __init__(self, api_key, api_secret_key,testnet=1):
+    def __init__(self, api_key, api_secret_key,testnet=0):
         self.api_key = api_key
         self.api_secret_key = api_secret_key
         if testnet==1:
@@ -18,7 +18,7 @@ class BinanceClient:
             
         self.client = Client(api_key,api_secret_key)
 
-    def get_klines(self, symbol, interval='1m', limit=20):
+    def get_klines(self, symbol, interval='15m', limit=100):
         url = f"{self.base_url}/fapi/v1/klines"
         params = {
             "symbol": symbol,
@@ -27,10 +27,17 @@ class BinanceClient:
         }
         response = requests.get(url, params=params)
         data = response.json()
-        # Print only open, high, low, and close values
-        # for entry in data:
-        #     print(f"Open: {entry[1]}, High: {entry[2]}, Low: {entry[3]}, Close: {entry[4]}")
-        return data
+        # here i have changed the open time in col1 to time , i have removed the rest of the columns and only kept time,ohlcv
+        columns = [
+            'time', 'open', 'high', 'low', 'close', 'volume',
+            'close_time', 'quote_asset_volume', 'number_of_trades',
+            'taker_buy_volume', 'taker_buy_quote', 'ignore'
+        ]
+        
+        df = pd.DataFrame(data, columns=columns)
+        df = df[['time', 'open', 'high', 'low', 'close', 'volume']]  # Keep only relevant columns
+        return df
+    
     def get_symbol_info(self, symbol):
         url = f"{self.base_url}/fapi/v1/exchangeInfo"
         response = requests.get(url)
@@ -275,22 +282,22 @@ if __name__ == "__main__":
     api_secret_key = '4a924ff228b870e760d42891db0a6b50a61139453232de53d7b80b7d3a7744ef'  # Your Binance API secret
 
     client = BinanceClient(api_key, api_secret_key)
-    client.set_leverage(symbol='BTCUSDT',leverage=50)
-    res = client.get_klines(symbol='BTCUSDT',interval='5m',limit=20)
+    # client.set_leverage(symbol='ETHUSD.P',leverage=50)
+    res = client.get_klines(symbol='ETHUSDT',interval='15m',limit=100)
     print(res)
 
-    if client.login():
-        symbol = "BTCUSDT"  # Example symbol
-        side = "BUY"
-        type = "MARKET"  # Changed to MARKET order type
-        quantity = 0.01
-        current_price = 104500
-        #levarge to 100
-        # No need to set a price for a MARKET order
-        client.get_account_balance()
-        time.sleep(2)
-        client.place_order(symbol, side, type, quantity,current_price)
-        # client.check_and_place_order(symbol, side, type, quantity)
-    else:
-        print("Cannot proceed without valid API credentials.")
+    # if client.login():
+    #     symbol = "ETHUSD.P"  # Example symbol
+    #     side = "BUY"
+    #     type = "MARKET"  # Changed to MARKET order type
+    #     quantity = 0.001
+    #     current_price = 3600
+    #     #levarge to 100
+    #     # No need to set a price for a MARKET order
+    #     client.get_account_balance()
+    #     time.sleep(2)
+    #     client.place_order(symbol, side, type, quantity,current_price)
+    #     # client.check_and_place_order(symbol, side, type, quantity)
+    # else:
+    #     print("Cannot proceed without valid API credentials.")
 

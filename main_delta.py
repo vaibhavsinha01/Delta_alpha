@@ -176,13 +176,14 @@ class DeltaBroker:
         
     def get_market_price(self):
         try:
-            df = self.fetch_data() # HERE I AM FETCHING DATA FROM BINANCE BECAUSE THE DATA FROM DELTA EXCHANGE IS GIVING A LAG OF 1 MINUTE
+            # df = self.fetch_data() # HERE I AM FETCHING DATA FROM BINANCE BECAUSE THE DATA FROM DELTA EXCHANGE IS GIVING A LAG OF 1 MINUTE
+            df = self.fetch_data_binance()
             last_row = df.iloc[-1]
             last_price = last_row['close']
             return last_price
         except Exception as e:
             try:
-                df = self.fetch_data() # HERE I AM FETCHING DATA FROM BINANCE BECAUSE THE DATA FROM DELTA EXCHANGE IS GIVING A LAG OF 1 MINUTE
+                df = self.fetch_data_binance() # HERE I AM FETCHING DATA FROM BINANCE BECAUSE THE DATA FROM DELTA EXCHANGE IS GIVING A LAG OF 1 MINUTE
                 last_row = df.iloc[-1]
                 last_price = last_row['Close']
                 return last_price
@@ -404,24 +405,16 @@ class DeltaBroker:
         except Exception as e:
             print(f"Error converting interval to seconds: {e}")
             return 60  # Default to 1 minute
-        
+    
     def fetch_data_binance(self):
         from binance_client_ import BinanceClient
-        binance_client = BinanceClient(api_key=BINANCE_API_KEY,api_secret_key=BINANCE_API_SECRET,testnet=1)
+        binance_client = BinanceClient(api_key=BINANCE_API_KEY,api_secret_key=BINANCE_API_SECRET,testnet=0)
         limit = 1000
         interval_seconds = delta_client.interval_to_seconds(DELTA_INTERVAL)
         end_time = int(time.time() * 1000)
         start_time = end_time - (interval_seconds * 1000 * limit)
-                        
-        self.df = binance_client.client.get_historical_klines(
-                    symbol=DELTA_SYMBOL,
-                    interval=DELTA_INTERVAL,
-                    start_time=start_time,
-                    end_time=end_time,
-                    limit=limit
-                )
-        self.df['Timestamp'] = self.df['timestamp']
-        self.df['time'] = self.df['Timestamp'].astype(np.int64) // 10**9
+        self.df = binance_client.get_klines(symbol=BINANCE_SYMBOL,interval=BINANCE_INTERVAL,limit=100)
+        self.df['Timestamp'] = pd.to_datetime(self.df['time'],unit='ms')
         self.df.sort_values(by='Timestamp',ascending=False,inplace=True)
         self.df = self.df.iloc[::-1].reset_index(drop=True)
         return self.df
@@ -646,7 +639,8 @@ def fake_trade_loss_checker(df, current_time):
 
             while True:
                 # df = delta_client.fetch_data_binance()  # get real-time data from Binance
-                df = delta_client.fetch_data()
+                # df = delta_client.fetch_data()
+                df = delta_client.fetch_data_binance()
                 df = calculate_signals(df)
                 df.to_csv('Delta_Final.csv')
 
@@ -1107,7 +1101,29 @@ if __name__ == "__main__":
         try:
             print("\n🔄 --- New Trading Cycle ---")
             # df_check = delta_client.fetch_data_binance() # HERE I AM FETCHING DATA FROM BINANCE BECAUSE THE DATA FROM DELTA EXCHANGE IS GIVING A LAG OF 1 MINUTE
-            df_check = delta_client.fetch_data()
+            # df_check = delta_client.fetch_data()
+            df_check = delta_client.fetch_data_binance()
+            # the following lines below have been added
+
+            # Validate fetched data
+            if df_check is None or df_check.empty:
+                print("ERROR: No data fetched from Binance")
+                continue
+
+            # print("Data types after fetch:")
+            # print(df_check.dtypes)
+
+            # Convert string columns to numeric BEFORE passing to calculate_signals
+            numeric_columns = ['open', 'high', 'low', 'close', 'volume']
+            for col in numeric_columns:
+                df_check[col] = pd.to_numeric(df_check[col], errors='coerce')
+
+            # Remove any rows with NaN values
+            df_check = df_check.dropna()
+
+            # print("Data types after conversion:")
+            # print(df_check.dtypes)
+            # the following lines above have been added
             df_check.rename(columns={'open':'Open','high':'High','low':'Low','close':'Close','volume':'Volume'},inplace=True)
             # df_check = calculate_heiken_ashi_testnet(df=df_check)
             df_check = calculate_signals(df=df_check)
@@ -1301,9 +1317,9 @@ if __name__ == "__main__":
                 time.sleep(1)
             else:
                 print("Outside trading hours, sleeping...")
-                time.sleep(300)  # Sleep 5 minutes when outside trading hours
+                time.sleep(60)  # Sleep 5 minutes when outside trading hours
                 
         except Exception as e:
             print(f"❌ Error in main loop: {e}")
-            time.sleep(60)
+            time.sleep(30)
             continue
