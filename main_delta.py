@@ -11,11 +11,13 @@ import warnings
 import requests
 import json
 from delta_rest_client import DeltaRestClient
+from my_logger import get_logger
 import hashlib
 import hmac
 
 # Suppress specific FutureWarnings from pandas
 warnings.simplefilter(action='ignore', category=FutureWarning)
+logger = get_logger("main_delta")
 
 fake_loss_amount = 0  # Track accumulated fake losses
 fake_loss_amount_maxlimit = DELTA_FAKE_LOSS_MAX_AMOUNT  # Maximum fake loss before increasing martingale level
@@ -807,6 +809,8 @@ def close_position_on_fake_signal():
             print(f"  Size: {martingale_manager.last_quantity}")
             
             # Place opposite market order to close position
+            current_price = delta_client.get_market_price()
+            logger.info(f"this is a fake order so the market order will be placed to close it , the current price is {current_price}")
             close_order = delta_client.place_order_market(
                 side=opposite_direction, 
                 size=martingale_manager.last_quantity
@@ -1267,6 +1271,7 @@ if __name__ == "__main__":
                         if entry_signal in DESIRED_TYPES and entry_signal != 0:
                         # if 1==1:
                             try:
+                                logger.info(f"a new order is about to be placed with entry_signal : {entry_signal}")
                                 delta_client.current_candle_time = int(df.iloc[-1]['time']) # placing getting time before anything
                                 direction = "buy" if int(entry_signal) > 0 else "sell"
                                 print(f"🎯 Taking {direction.upper()} trade!")
@@ -1305,6 +1310,8 @@ if __name__ == "__main__":
                                 # Step 1: Place market order first
                                 print("📝 Placing market order...")
                                 # current_candle_time = df.iloc[-1]['time']
+                                current_price = delta_client.get_market_price()
+                                logger.info(f"current_price is {current_price} before placing the market order")
                                 market_order = delta_client.place_order_market(direction, trade_amount)
                                 
                                 if market_order:
@@ -1318,6 +1325,7 @@ if __name__ == "__main__":
                                     # Step 2: Place bracket order for SL/TP management
                                     print("📝 Placing bracket order for SL/TP...")
                                     try:
+                                        logger.info(f"placing order at sl: {sl} , tp: {tp}")
                                         bracket_order_res = delta_client.place_order_bracket(
                                             side=direction,
                                             size=trade_amount,
@@ -1330,6 +1338,7 @@ if __name__ == "__main__":
                                             raise Exception("Bracket order placement failed")
                                     except Exception as e:
                                         print(f"Initial bracket order failed {e}")
+                                        time.sleep(2)
                                         if direction.lower() == 'buy':
                                             sl = round(sl-15,2)
                                             tp = round(tp+5,2)
@@ -1340,6 +1349,7 @@ if __name__ == "__main__":
                                             print(f"Invalid direction {direction}")
                                         
                                         try:
+                                            logger.info(f"placing order since last bracket order failed at sl: {sl} , tp: {tp}")
                                             bracket_order_res = delta_client.place_order_bracket(
                                                 side=direction,
                                                 size=trade_amount,
@@ -1351,10 +1361,13 @@ if __name__ == "__main__":
                                         except Exception as e2:
                                             print(f"fallback bracket order also has failed {e2}")
                                             bracket_order_res = None
+                                            current_price = delta_client.get_market_price()
                                             if direction == 'buy':
+                                                logger.info(f"since the fallback market order also failed we are closing the order at {current_price}")
                                                 delta_client.place_order_market(side='sell',size=martingale_manager.last_quantity)
                                                 martingale_manager.clear_position()
                                             else:
+                                                logger.info(f"since the fallback market order also failed we are closing the order at {current_price}")
                                                 delta_client.place_order_market(side='buy',size=martingale_manager.last_quantity)
                                                 martingale_manager.clear_position()
                                         
