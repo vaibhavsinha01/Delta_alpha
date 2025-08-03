@@ -671,7 +671,7 @@ class MartingaleManager:
 
                 except Exception as e:
                     print(f"Error in position monitoring loop: {e}")
-                    time.sleep(2) # doesn't happen no need
+                    time.sleep(1) # doesn't happen no need
                     continue
 
             return True
@@ -1422,9 +1422,9 @@ if __name__ == "__main__":
                 time.sleep(2) # change this from 3s to 2s - important
             else:
                 print("Outside trading hours, sleeping...")
-                time.sleep(2)  # Sleep 1 minutes when outside trading hours - doesn't matter 
+                time.sleep(1)  # Sleep 1 minutes when outside trading hours - doesn't matter 
                 
         except Exception as e:
             print(f"❌ Error in main loop: {e}") 
-            time.sleep(2) # doesn't matter
+            time.sleep(1) # doesn't matter
             continue
