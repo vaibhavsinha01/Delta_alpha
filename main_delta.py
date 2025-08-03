@@ -236,7 +236,7 @@ class DeltaBroker:
                 
         except Exception as e: # don't get the result as success 
             # print(f"Error getting active positions: {e}")
-            import time
+            # import time
             # time.sleep(10) # keep this here - once every 500 times
             logger.info(f"exception occured in get_active_positions so sleeping for 0 seconds")
             try:
