@@ -6,7 +6,7 @@
 BINANCE_API_KEY = "34nj4RR3uMcECFaa8OIf6v4zSls2MzqmT952KpWVf2TmWSXPznJFKzFjh3555JgT"
 BINANCE_API_SECRET = "GMBWYiKYfrnRMyAzBVQzVQ3pNyXZovQSIUhN1c69oszwmaY5LPSvQbV7qhjiweq5"
 BINANCE_SYMBOL = 'ETHUSDT'  # Trading pair - changed from BTCUSDT
-BINANCE_INTERVAL = '1m'  # Candle intervals
+BINANCE_INTERVAL = '15m'  # Candle intervals
 BINANCE_TESTNET_STATUS = 0 # use this to trade on the testnet and set the value to 0 to trade on the mainnet , remainder that there are separate api_keys,api_secrets for the binance_testnet_status
 
 # Don't change the variables here they have nothing to do with the values in the code in main file
@@ -17,7 +17,7 @@ RANGE_FILTER_LENGTH = 20
 # Don't change the variables here they have nothing to do with the values in the code in main file
 
 # Martingale - don't change any of these 
-MARTINGALE_ENABLED = True
+MARTINGALE_ENABLED = True # keep it as true for martingale and false for no martingale 
 MARTINGALE_MULTIPLIER = 2
 MARTINGALE_MAX_STEPS = 5
 MARTINGALE_MODE = 'RM1' 
@@ -40,14 +40,14 @@ START_MINUTE = 00
 END_HOUR = 23
 END_MINUTE = 59
 
-RENTRY_TIME_BINANCE = 120 # this is the time in seconds to enter once the trade has been closed for binance
-MASTER_HEIKEN_CHOICE = 1
+RENTRY_TIME_BINANCE = 900 # this is the time in seconds to enter once the trade has been closed for binance
+MASTER_HEIKEN_CHOICE = 0
 
 # DESIRED_TYPES = [1,2,3,-1,-2,-3]
 # DESIRED_TYPES = [-1,-2,-3] # only take sell trades 
 # DESIRED_TYPES = [1,2,3] # only take buy trades
-DESIRED_TYPES = [1,2,3,-1,-2,-3]
-# DESIRED_TYPES = [2,-2]
+# DESIRED_TYPES = [1,2,3,-1,-2,-3]
+DESIRED_TYPES = [2,-2]
 """
 Configuration File - `config.py`
 Important Note -> always ensure that the code is saved properly CTRL+S before exiting
@@ -104,12 +104,12 @@ DELTA_SYMBOL = "ETHUSD" # use ETHUSDT when using binance to fetch and use ETHUSD
 DELTA_SYMBOL_PLACE_ORDER = "ETHUSD" # used for placing order
 DELTA_TOKEN = 3136 
 DELTA_MIN_LOT = 0.01
-DELTA_BASE_LEVERAGE = 10 
-DELTA_FAKE_LOSS_MAX_AMOUNT = 2
-DELTA_INTERVAL = "1m" 
-DELTA_SL_BUFFER_POINTS = 10
-DELTA_TP_PERCENT = 0.3
-DELTA_INITIAL_CAPITAL = 850
+DELTA_BASE_LEVERAGE = 10 # change the base leverage also
+DELTA_FAKE_LOSS_MAX_AMOUNT = 1 # this amount is in dollars 
+DELTA_INTERVAL = "15m" 
+DELTA_SL_BUFFER_POINTS = 15
+DELTA_TP_PERCENT = 0.63
+DELTA_INITIAL_CAPITAL = 450
 
 """
 Delta Exchange Trading Configuration - `config.py`

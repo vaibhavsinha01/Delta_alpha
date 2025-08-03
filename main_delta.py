@@ -234,10 +234,10 @@ class DeltaBroker:
             else:
                 return True
                 
-        except Exception as e:
+        except Exception as e: # don't get the result as success 
             # print(f"Error getting active positions: {e}")
             import time
-            time.sleep(10)
+            time.sleep(10) # keep this here - once every 500 times
             try:
                 method = "GET"
                 path = "/v2/positions"
@@ -397,7 +397,7 @@ class DeltaBroker:
 
         except Exception as e:
             import time
-            time.sleep(10)
+            time.sleep(10) # here it here - once every 500 times
             print(f"sleeping for 10 seconds because and exception in setting leverage has occured")
             try:
                 method = "POST"
@@ -657,19 +657,19 @@ class MartingaleManager:
 
                         self.clear_position()
 
-                        print("🛌 Sleeping for 120 seconds to avoid re-entry in same candle...")
-                        time.sleep(RENTRY_TIME_BINANCE)
+                        print("🛌 Sleeping for 900 seconds to avoid re-entry in same candle...") # ask about this one
+                        time.sleep(RENTRY_TIME_BINANCE) # won't affect the code 
                         print("🔄 Ready for next trade opportunity")
                         return True
 
                     # Still open
                     print(f"📈 Order still open... TP state: {current_bracket_state_tp}, SL state: {current_bracket_state_sl}")
-                    time.sleep(7)
+                    time.sleep(7) # keep it the way it is - not market order
                     continue
 
                 except Exception as e:
                     print(f"Error in position monitoring loop: {e}")
-                    time.sleep(7)
+                    time.sleep(2) # doesn't happen no need
                     continue
 
             return True
@@ -778,16 +778,16 @@ def fake_trade_loss_checker(df, current_time):
                         # Reset trade tracking
                         reset_trade_tracking()
                         import time
-                        print(f"sleeping for 120 seconds to prevent re-entry")
-                        time.sleep(120)
+                        print(f"sleeping for 900 seconds to prevent re-entry")
+                        time.sleep(RENTRY_TIME_BINANCE) # important rf_filter+ib_box don't form signals in consecutive candles 
                         return True
                     else:
                         print("✅ Signal is still valid. No fake trade.")
                         return False
                 else:
-                    print("🕒 Waiting for new candle... Sleeping 3 seconds.")
+                    print("🕒 Waiting for new candle... Sleeping 2 seconds.")
                     import time
-                    time.sleep(3)
+                    time.sleep(2) # important 
 
     except Exception as e:
         print(f"⚠️ Error in fake_trade_loss_checker: {e}")
@@ -1264,12 +1264,9 @@ if __name__ == "__main__":
                         print(f"📊 Current Price: ${current_price}")
                         print(f"📈 Signal: {entry_signal}")
                         print(f"📊 RM1 Level: {martingale_manager.current_level}")
-                        import time
-                        time.sleep(5)
 
                         # Check for entry signal
                         if entry_signal in DESIRED_TYPES and entry_signal != 0:
-                        # if 1==1:
                             try:
                                 logger.info(f"a new order is about to be placed with entry_signal : {entry_signal}")
                                 delta_client.current_candle_time = int(df.iloc[-1]['time']) # placing getting time before anything
@@ -1320,7 +1317,7 @@ if __name__ == "__main__":
                                     # ===== END TRADE TRACKING (LOCATION 2) =====
                                     
                                     # Wait a moment for the order to fill
-                                    time.sleep(3)
+                                    time.sleep(2) # decreased from 3 to 2 - important
                                     
                                     # Step 2: Place bracket order for SL/TP management
                                     print("📝 Placing bracket order for SL/TP...")
@@ -1338,7 +1335,7 @@ if __name__ == "__main__":
                                             raise Exception("Bracket order placement failed")
                                     except Exception as e:
                                         print(f"Initial bracket order failed {e}")
-                                        time.sleep(2)
+                                        time.sleep(2) # important - can't change 
                                         if direction.lower() == 'buy':
                                             sl = round(sl-15,2)
                                             tp = round(tp+5,2)
@@ -1419,13 +1416,13 @@ if __name__ == "__main__":
                     print(f"Error displaying status: {status_e}")
                 
                 # Sleep between cycles
-                print(f"💤 Sleeping for {3} seconds...")
-                time.sleep(3)
+                print(f"💤 Sleeping for {2} seconds...")
+                time.sleep(2) # change this from 3s to 2s - important
             else:
                 print("Outside trading hours, sleeping...")
-                time.sleep(60)  # Sleep 5 minutes when outside trading hours
+                time.sleep(60)  # Sleep 1 minutes when outside trading hours - doesn't matter 
                 
         except Exception as e:
-            print(f"❌ Error in main loop: {e}")
-            time.sleep(30)
+            print(f"❌ Error in main loop: {e}") 
+            time.sleep(30) # doesn't matter
             continue
