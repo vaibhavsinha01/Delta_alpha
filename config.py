@@ -6,7 +6,7 @@
 BINANCE_API_KEY = "34nj4RR3uMcECFaa8OIf6v4zSls2MzqmT952KpWVf2TmWSXPznJFKzFjh3555JgT"
 BINANCE_API_SECRET = "GMBWYiKYfrnRMyAzBVQzVQ3pNyXZovQSIUhN1c69oszwmaY5LPSvQbV7qhjiweq5"
 BINANCE_SYMBOL = 'ETHUSDT'  # Trading pair - changed from BTCUSDT
-BINANCE_INTERVAL = '5m'  # Candle intervals
+BINANCE_INTERVAL = '1m'  # Candle intervals
 BINANCE_TESTNET_STATUS = 0 # use this to trade on the testnet and set the value to 0 to trade on the mainnet , remainder that there are separate api_keys,api_secrets for the binance_testnet_status
 
 # Don't change the variables here they have nothing to do with the values in the code in main file
@@ -106,9 +106,9 @@ DELTA_TOKEN = 3136
 DELTA_MIN_LOT = 0.01
 DELTA_BASE_LEVERAGE = 10 # change the base leverage also
 DELTA_FAKE_LOSS_MAX_AMOUNT = 1 # this amount is in dollars 
-DELTA_INTERVAL = "5m" 
-DELTA_SL_BUFFER_POINTS = 15
-DELTA_TP_PERCENT = 0.63
+DELTA_INTERVAL = "1m" 
+DELTA_SL_BUFFER_POINTS = 12
+DELTA_TP_PERCENT = 0.43
 DELTA_INITIAL_CAPITAL = 450
 
 """

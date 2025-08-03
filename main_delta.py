@@ -1337,7 +1337,7 @@ if __name__ == "__main__":
                                             raise Exception("Bracket order placement failed")
                                     except Exception as e:
                                         print(f"Initial bracket order failed {e}")
-                                        time.sleep(2) # important - can't change 
+                                        time.sleep(1) # important - can't change 
                                         if direction.lower() == 'buy':
                                             sl = round(sl-15,2)
                                             tp = round(tp+5,2)
@@ -1422,9 +1422,9 @@ if __name__ == "__main__":
                 time.sleep(2) # change this from 3s to 2s - important
             else:
                 print("Outside trading hours, sleeping...")
-                time.sleep(60)  # Sleep 1 minutes when outside trading hours - doesn't matter 
+                time.sleep(2)  # Sleep 1 minutes when outside trading hours - doesn't matter 
                 
         except Exception as e:
             print(f"❌ Error in main loop: {e}") 
-            time.sleep(30) # doesn't matter
+            time.sleep(2) # doesn't matter
             continue
