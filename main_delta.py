@@ -397,8 +397,9 @@ class DeltaBroker:
 
         except Exception as e:
             import time
-            time.sleep(10) # here it here - once every 500 times
-            print(f"sleeping for 10 seconds because and exception in setting leverage has occured")
+            time.sleep(1)
+            print(f"sleeping for 1 seconds because and exception in setting leverage has occured")
+            logger.info(f"sleeping for 1 seconds before placing the order")
             try:
                 method = "POST"
                 path = f"/v2/products/{self.product_id}/orders/leverage"
@@ -1317,7 +1318,7 @@ if __name__ == "__main__":
                                     # ===== END TRADE TRACKING (LOCATION 2) =====
                                     
                                     # Wait a moment for the order to fill
-                                    time.sleep(2) # decreased from 3 to 2 - important
+                                    # time.sleep(2) # decreased from 3 to 2 - important
                                     
                                     # Step 2: Place bracket order for SL/TP management
                                     print("📝 Placing bracket order for SL/TP...")
