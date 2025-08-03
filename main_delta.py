@@ -237,7 +237,8 @@ class DeltaBroker:
         except Exception as e: # don't get the result as success 
             # print(f"Error getting active positions: {e}")
             import time
-            time.sleep(10) # keep this here - once every 500 times
+            # time.sleep(10) # keep this here - once every 500 times
+            logger.info(f"exception occured in get_active_positions so sleeping for 0 seconds")
             try:
                 method = "GET"
                 path = "/v2/positions"
@@ -399,7 +400,7 @@ class DeltaBroker:
             import time
             time.sleep(1)
             print(f"sleeping for 1 seconds because and exception in setting leverage has occured")
-            logger.info(f"sleeping for 1 seconds before placing the order")
+            logger.info(f"sleeping for 1 seconds because of exception")
             try:
                 method = "POST"
                 path = f"/v2/products/{self.product_id}/orders/leverage"
