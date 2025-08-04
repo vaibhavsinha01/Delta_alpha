@@ -397,10 +397,10 @@ class DeltaBroker:
                 return False
 
         except Exception as e:
-            import time
-            time.sleep(1)
-            print(f"sleeping for 1 seconds because and exception in setting leverage has occured")
-            logger.info(f"sleeping for 1 seconds because of exception")
+            # import time
+            # time.sleep(1)
+            print(f"sleeping for 0 seconds because and exception in setting leverage has occured")
+            logger.info(f"sleeping for 0 seconds because of exception")
             try:
                 method = "POST"
                 path = f"/v2/products/{self.product_id}/orders/leverage"
@@ -1418,8 +1418,8 @@ if __name__ == "__main__":
                     print(f"Error displaying status: {status_e}")
                 
                 # Sleep between cycles
-                print(f"💤 Sleeping for {2} seconds...")
-                time.sleep(2) # change this from 3s to 2s - important
+                print(f"💤 Sleeping for {1.5} seconds...")
+                time.sleep(1.5) # change this from 3s to 1.5s - important
             else:
                 print("Outside trading hours, sleeping...")
                 time.sleep(1)  # Sleep 1 minutes when outside trading hours - doesn't matter 
