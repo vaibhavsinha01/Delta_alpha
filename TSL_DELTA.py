@@ -162,6 +162,87 @@ class DeltaBroker:
                 # return result['result']
                 return result
             return None
+        except Exception as e:
+            print(f"Error in place_order_bracket function: {e}")
+            return None
+
+    def cancel_order(self, order_id):
+        """Cancel an order by ID on Delta Exchange"""
+        try:
+            method = 'DELETE'
+            path = f"/v2/orders/{order_id}"
+            url = self.base_url + path
+            timestamp = str(int(time.time()))
+            query_string = ''
+            payload_json = ''
+            signature_data = method + timestamp + path + query_string + payload_json
+            signature = self.generate_signature(self.api_secret, signature_data)
+
+            headers = {
+                'api-key': self.api_key,
+                'timestamp': timestamp,
+                'signature': signature,
+                'User-Agent': 'python-rest-client'
+            }
+
+            response = requests.delete(url, headers=headers)
+            try:
+                res_json = response.json()
+            except Exception:
+                res_json = {"status_code": response.status_code}
+            print(f"Cancel Order Response ({order_id}): {response.status_code} {res_json}")
+            return response.status_code == 200
+        except Exception as e:
+            print(f"Error canceling order {order_id}: {e}")
+            return False
+
+    def place_stop_loss_order(self, side, size, stop_price):
+        """Place a reduce-only stop loss order (limit order with stop)"""
+        try:
+            # Derive a limit price slightly beyond the stop to ensure trigger
+            stop_price_f = float(stop_price)
+            if side == 'sell':
+                limit_price = stop_price_f - 2
+            else:  # buy to close shorts
+                limit_price = stop_price_f + 2
+
+            payload = {
+                "product_symbol": self.product_symbol_place_order,
+                "size": int(size),
+                "side": side,
+                "order_type": "limit_order",
+                "time_in_force": "gtc",
+                "reduce_only": True,
+                "stop_price": str(stop_price_f),
+                "limit_price": str(limit_price)
+            }
+
+            method = 'POST'
+            path = '/v2/orders'
+            url = self.base_url + path
+            timestamp = str(int(time.time()))
+            query_string = ''
+            payload_json = json.dumps(payload, separators=(',', ':'))
+            signature_data = method + timestamp + path + query_string + payload_json
+            signature = self.generate_signature(self.api_secret, signature_data)
+
+            headers = {
+                'api-key': self.api_key,
+                'timestamp': timestamp,
+                'signature': signature,
+                'User-Agent': 'python-rest-client',
+                'Content-Type': 'application/json'
+            }
+
+            response = requests.post(url, headers=headers, data=payload_json)
+            result = response.json()
+            print(f"Stop Loss Order Response: {response.status_code} {result}")
+            if response.status_code == 200 and result.get('success'):
+                return result['result']
+            return None
+        except Exception as e:
+            print(f"Error placing stop-loss order: {e}")
+            return None
 
         except Exception as e:
             print(f"Error in place_order_bracket function: {e}")
@@ -558,6 +639,8 @@ class MartingaleManager:
         self.position_order_id = None
         self.last_tp_price = None
         self.last_sl_price = None
+        self.original_sl_price = None
+        self.sl_order_id = None
         self.last_entry_price = None
         self.last_direction = None
         self.last_quantity = None
@@ -585,6 +668,7 @@ class MartingaleManager:
             
             self.last_entry_price = entry_price
             self.last_sl_price = sl_price
+            self.original_sl_price = sl_price
             self.last_tp_price = tp_price
             self.last_direction = direction
             self.last_quantity = quantity
@@ -601,6 +685,8 @@ class MartingaleManager:
             self.position_order_id = None
             self.last_tp_price = None
             self.last_sl_price = None
+            self.original_sl_price = None
+            self.sl_order_id = None
             self.last_entry_price = None
             self.last_direction = None
             self.last_quantity = None
@@ -648,11 +734,61 @@ class MartingaleManager:
                     sl_res = delta_client.get_order_status(order_id=bracket_sl_order_id)
                     current_bracket_state_sl = sl_res['result']['state']
 
+                    # Trailing SL: compute candidate and replace standalone SL order if improved
+                    try:
+                        if ENABLE_TRAILING_SL and self.last_sl_price is not None:
+                            trail_pct = (TRAILING_SL_PERCENT / 100.0)
+                            current_price = delta_client.get_market_price()
+                            if self.last_direction in ['buy', 'BUY'] and trail_pct > 0:
+                                candidate = round(current_price * (1 - trail_pct), 2)
+                                base_sl = self.original_sl_price if self.original_sl_price is not None else self.last_sl_price
+                                new_sl = max(base_sl, candidate)
+                                if new_sl > self.last_sl_price:
+                                    print(f"🔧 Trailing SL update (BUY): {self.last_sl_price} -> {new_sl}")
+                                    self.last_sl_price = new_sl
+                                    # Replace standalone SL order on exchange
+                                    try:
+                                        if self.sl_order_id:
+                                            delta_client.cancel_order(self.sl_order_id)
+                                        sl_side = 'sell'
+                                        sl_res = delta_client.place_stop_loss_order(sl_side, self.last_quantity, self.last_sl_price)
+                                        if sl_res and sl_res.get('id'):
+                                            self.sl_order_id = sl_res.get('id')
+                                            print(f"📌 Replaced SL order id {self.sl_order_id} at {self.last_sl_price}")
+                                    except Exception as rep_e:
+                                        print(f"Error replacing SL order: {rep_e}")
+                            elif self.last_direction in ['sell', 'SELL'] and trail_pct > 0:
+                                candidate = round(current_price * (1 + trail_pct), 2)
+                                base_sl = self.original_sl_price if self.original_sl_price is not None else self.last_sl_price
+                                new_sl = min(base_sl, candidate)
+                                if new_sl < self.last_sl_price:
+                                    print(f"🔧 Trailing SL update (SELL): {self.last_sl_price} -> {new_sl}")
+                                    self.last_sl_price = new_sl
+                                    # Replace standalone SL order on exchange
+                                    try:
+                                        if self.sl_order_id:
+                                            delta_client.cancel_order(self.sl_order_id)
+                                        sl_side = 'buy'
+                                        sl_res = delta_client.place_stop_loss_order(sl_side, self.last_quantity, self.last_sl_price)
+                                        if sl_res and sl_res.get('id'):
+                                            self.sl_order_id = sl_res.get('id')
+                                            print(f"📌 Replaced SL order id {self.sl_order_id} at {self.last_sl_price}")
+                                    except Exception as rep_e:
+                                        print(f"Error replacing SL order: {rep_e}")
+                    except Exception as trail_e:
+                        print(f"Error updating trailing SL: {trail_e}")
+
                     # Check if either TP or SL is closed
                     if current_bracket_state_tp == "closed" or current_bracket_state_sl == "closed":
                         print(f"✅ Order closed. TP state: {current_bracket_state_tp}, SL state: {current_bracket_state_sl}")
 
                         if current_bracket_state_tp == "closed":
+                            # Cancel standalone SL if exists
+                            try:
+                                if self.sl_order_id:
+                                    delta_client.cancel_order(self.sl_order_id)
+                            except Exception as c_e:
+                                print(f"Warning: failed to cancel standalone SL before TP settle: {c_e}")
                             self.update_trade_result('win')
                         elif current_bracket_state_sl == "closed":
                             self.update_trade_result('loss')
@@ -813,20 +949,10 @@ def close_position_on_fake_signal():
             # Place opposite market order to close position
             current_price = delta_client.get_market_price()
             logger.info(f"this is a fake order so the market order will be placed to close it , the current price is {current_price}")
-            # here i will add the logic for not closing if the tp/sl got hit
-            tp_res = delta_client.get_order_status(order_id=bracket_tp_order_id)
-            current_bracket_state_tp = tp_res['result']['state']
-
-            sl_res = delta_client.get_order_status(order_id=bracket_sl_order_id)
-            current_bracket_state_sl = sl_res['result']['state']
-            logger.info(f"the current sl status is {current_bracket_state_sl} and the current tp status is {current_bracket_state_tp}")
-            if current_bracket_state_sl != "FILLED" and current_bracket_state_tp != "FILLED": # this logic is correct
-                close_order = delta_client.place_order_market(
-                    side=opposite_direction, 
-                    size=martingale_manager.last_quantity
-                )
-            else:
-                logger.info(f"the sl / tp was hitted before the execution so no closing market order , sl status : {current_bracket_state_sl} , tp status : {current_bracket_state_tp}")
+            close_order = delta_client.place_order_market(
+                side=opposite_direction, 
+                size=martingale_manager.last_quantity
+            )
             
             if close_order:
                 print(f"✅ Position closed successfully: {close_order.get('id')}")
@@ -1397,6 +1523,18 @@ if __name__ == "__main__":
                                         
                                     # Set position status
                                     martingale_manager.set_position(direction, entry_price, sl, tp, trade_amount)
+
+                                    # Place standalone SL order as well to allow live replacement (optional safety)
+                                    try:
+                                        sl_side = 'sell' if direction == 'buy' else 'buy'
+                                        sl_res = delta_client.place_stop_loss_order(sl_side, trade_amount, sl)
+                                        if sl_res and sl_res.get('id'):
+                                            martingale_manager.sl_order_id = sl_res.get('id')
+                                            print(f"📌 Initial standalone SL placed: {martingale_manager.sl_order_id} at {sl}")
+                                        else:
+                                            print("❌ Failed to place standalone SL order for trailing replacement")
+                                    except Exception as ooe:
+                                        print(f"Error placing standalone SL: {ooe}")
                                         
                                     # Wait for bracket order to complete (simplified approach)
                                     print("⏳ Waiting for bracket order to complete...")
