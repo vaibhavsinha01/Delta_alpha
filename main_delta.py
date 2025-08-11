@@ -813,10 +813,18 @@ def close_position_on_fake_signal():
             # Place opposite market order to close position
             current_price = delta_client.get_market_price()
             logger.info(f"this is a fake order so the market order will be placed to close it , the current price is {current_price}")
-            close_order = delta_client.place_order_market(
-                side=opposite_direction, 
-                size=martingale_manager.last_quantity
-            )
+            # here i will add the logic for not closing if the tp/sl got hit
+            tp_res = delta_client.get_order_status(order_id=bracket_tp_order_id)
+            current_bracket_state_tp = tp_res['result']['state']
+
+            sl_res = delta_client.get_order_status(order_id=bracket_sl_order_id)
+            current_bracket_state_sl = sl_res['result']['state']
+            logger.info(f"the current sl status is {current_bracket_state_sl} and the current tp status is {current_bracket_state_tp}")
+            if current_bracket_state_sl != "FILLED" and current_bracket_state_tp != "FILLED": # this logic is correct
+                close_order = delta_client.place_order_market(
+                    side=opposite_direction, 
+                    size=martingale_manager.last_quantity
+                )
             
             if close_order:
                 print(f"✅ Position closed successfully: {close_order.get('id')}")

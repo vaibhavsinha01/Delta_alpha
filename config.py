@@ -105,11 +105,13 @@ DELTA_SYMBOL_PLACE_ORDER = "ETHUSD" # used for placing order
 DELTA_TOKEN = 3136 
 DELTA_MIN_LOT = 0.01
 DELTA_BASE_LEVERAGE = 10 # change the base leverage also
-DELTA_FAKE_LOSS_MAX_AMOUNT = 0.5 # this amount is in dollars 
+DELTA_FAKE_LOSS_MAX_AMOUNT = 100 # this amount is in dollars 
 DELTA_INTERVAL = "15m" 
 DELTA_SL_BUFFER_POINTS = 15
-DELTA_TP_PERCENT = 0.86
+DELTA_TP_PERCENT = 0.8
 DELTA_INITIAL_CAPITAL = 450
+DELTA_TRAILING_POINTS = 15
+DELTA_TRAILING_BUFFER = 15
 
 """
 Delta Exchange Trading Configuration - `config.py`
