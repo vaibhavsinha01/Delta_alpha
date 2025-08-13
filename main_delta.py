@@ -400,7 +400,7 @@ class DeltaBroker:
             # import time
             # time.sleep(1)
             print(f"sleeping for 0 seconds because and exception in setting leverage has occured")
-            logger.info(f"sleeping for 0 seconds because of exception")
+            logger.info(f"sleeping for 0 seconds because of exception in setting leverage")
             try:
                 method = "POST"
                 path = f"/v2/products/{self.product_id}/orders/leverage"
@@ -819,10 +819,11 @@ def close_position_on_fake_signal():
 
             sl_res = delta_client.get_order_status(order_id=bracket_sl_order_id)
             current_bracket_state_sl = sl_res['result']['state']
-            logger.info(f"the current sl status is {current_bracket_state_sl} and the current tp status is {current_bracket_state_tp}")
+            # logger.info(f"the current sl status is {current_bracket_state_sl} and the current tp status is {current_bracket_state_tp}")
             if current_bracket_state_sl == "FILLED" or current_bracket_state_tp == "FILLED": # this logic is correct
                 logger.info(f"the sl / tp was hitted before the execution so no closing market order , sl status : {current_bracket_state_sl} , tp status : {current_bracket_state_tp}")
             else:
+                logger.info(f"the sl / tp was not hit so we are closing market order , sl status : {current_bracket_state_sl} , tp status : {current_bracket_state_tp}")
                 close_order = delta_client.place_order_market(
                     side=opposite_direction, 
                     size=martingale_manager.last_quantity
@@ -1280,7 +1281,7 @@ if __name__ == "__main__":
                         # Check for entry signal
                         if entry_signal in DESIRED_TYPES and entry_signal != 0:
                             try:
-                                logger.info(f"a new order is about to be placed with entry_signal : {entry_signal}")
+                                # logger.info(f"a new order is about to be placed with entry_signal : {entry_signal}")
                                 delta_client.current_candle_time = int(df.iloc[-1]['time']) # placing getting time before anything
                                 direction = "buy" if int(entry_signal) > 0 else "sell"
                                 print(f"🎯 Taking {direction.upper()} trade!")
