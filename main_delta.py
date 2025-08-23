@@ -762,6 +762,7 @@ def fake_trade_loss_checker(df, current_time):
 
                         print(f"  Calculated fake loss: ${fake_loss:.2f}")
                         print(f"  Total fake loss amount: ${fake_loss_amount:.2f}")
+                        logger.info(f"Fake Loss amount is ${fake_loss_amount}")
                         print(f"  Max limit: ${fake_loss_amount_maxlimit}")
 
                         # Adjust martingale if needed
@@ -1195,6 +1196,7 @@ if __name__ == "__main__":
         print(f"⏰ Interval: {DELTA_INTERVAL}")
         print(f"✅ TP PERCENT: {DELTA_TP_PERCENT}")
         print(f"❌ SL BUFFER POINTS: {DELTA_SL_BUFFER_POINTS}")
+        logger.info(f"Fake Loss amount is ${fake_loss_amount}")
         print("=" * 50)
         
         # Set initial leverage
