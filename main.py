@@ -668,7 +668,6 @@ class MartingaleManager:
                 logger.info(f"since an opposite signal is detected now we have placed an order with response {res} , now the position status of self.h_pos is {self.h_pos}")
                 
                 if res:
-                    time.sleep(2)
                     balance_after = float(delta_client.get_usd_balance())
                     loss_amount = balance_before - balance_after
                     
@@ -691,7 +690,7 @@ class MartingaleManager:
                     logger.info(f"a balance amount of {loss_amount:.2f} is incremented to the fake trade loss , the balance before was {balance_before} and the balance after is {balance_after} the total balance till now is {fake_loss_amount:.2f} and max limit is {fake_loss_amount_maxlimit} and the current level is {self.current_level}")
                     
                     self.clear_position()
-                    time.sleep(2)
+                    # time.sleep(2)
                     return True
             
             return False
@@ -1333,7 +1332,7 @@ if __name__ == "__main__":
     
                     if opposite_signal_exit:
                         print("🚨 Position closed due to opposite signal!")
-                        time.sleep(1)  # Less delay so the opposite trade is taken with a slight delay
+                        # time.sleep(1)  # Less delay so the opposite trade is taken with a slight delay - no need i think
                         if opposite_signal_exit:
                         # Check fake loss limit (same logic as fake_trade_loss_checker)
                             if fake_loss_amount >= fake_loss_amount_maxlimit:
@@ -1532,8 +1531,8 @@ if __name__ == "__main__":
                     print(f"Error displaying status: {status_e}")
                 
                 # Sleep between cycles
-                print(f"💤 Sleeping for {1.5} seconds...")
-                time.sleep(1.5) # change this from 3s to 1.5s - important
+                print(f"💤 Sleeping for {1} seconds...")
+                time.sleep(1) # change this from 3s to 1.5s - important
             else:
                 print("Outside trading hours, sleeping...")
                 time.sleep(1)  # Sleep 1 minutes when outside trading hours - doesn't matter 
