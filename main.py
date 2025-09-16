@@ -30,6 +30,7 @@ bracket_tp_order_id = None
 bracket_sl_order_id = None
 current_bracket_state_tp = None
 current_bracket_state_sl = None
+fake_trade_flag = 0
 
 class DeltaBroker:
     def __init__(self):
@@ -1322,11 +1323,11 @@ if __name__ == "__main__":
                 print(f"Trading time active: {is_time_in_range_ist()}")
 
                 if martingale_manager.h_pos != 0:
-                            
-                    fake_signal_with_position = fake_trade_loss_checker(df_position_check, delta_client.current_candle_time)
-                            
-                    if fake_signal_with_position:
-                        print("🚨 Fake signal detected with active position!")
+                    if fake_trade_flag != 0:
+                        fake_signal_with_position = fake_trade_loss_checker(df_position_check, delta_client.current_candle_time)
+                        fake_trade_flag = 0  # Reset flag regardless of result
+                        if fake_signal_with_position:
+                            print("🚨 Fake signal detected with active position!")
                     
                     opposite_signal_exit = martingale_manager.check_opposite_signal()
     
@@ -1425,6 +1426,7 @@ if __name__ == "__main__":
                                 if market_order:
                                     print(f"✅ Market order placed: {market_order.get('id')}")
                                     set_trade_tracking(entry_signal, direction, entry_price, delta_client.current_candle_time)
+                                    fake_trade_flag = 1
                                     # ===== END TRADE TRACKING (LOCATION 2) =====
                                     
                                     # Wait a moment for the order to fill
