@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-from main import MartingaleManager, RiskManager, TradeStateManager, check_entry_conditions
+from main_binance import MartingaleManager, RiskManager, TradeStateManager, check_entry_conditions
 
 def generate_test_data(n_candles=100):
     """Generate synthetic OHLCV data for testing"""

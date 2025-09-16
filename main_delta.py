@@ -745,12 +745,17 @@ def fake_trade_loss_checker(df, current_time):
 
                     second_last_candle = df.iloc[-2]
                     second_last_signal = second_last_candle['Signal_Final']
+                    second_last_signal_time = second_last_candle['Timestamp']
+                    last_candle = df.iloc[-1]
+                    last_signal = last_candle['Signal_Final']
                     print(f"Second last signal: {second_last_signal}")
 
                     if second_last_signal == 0:
                         print("🚨 FAKE SIGNAL DETECTED!")
                         print(f"  Trade taken at: {trade_taken_time}")
                         print(f"  Original signal: {trade_taken_signal}")
+                        logger.info(f"fake signal is detected trade taken at {trade_taken_time} with original signal {trade_taken_signal} and the second last signal time is {second_last_signal_time}")
+                        logger.info(f"last signal is {last_signal} , second last signal is {second_last_signal}")
 
                         # Close the position
                         close_position_on_fake_signal()
@@ -762,7 +767,7 @@ def fake_trade_loss_checker(df, current_time):
 
                         print(f"  Calculated fake loss: ${fake_loss:.2f}")
                         print(f"  Total fake loss amount: ${fake_loss_amount:.2f}")
-                        logger.info(f"Fake Loss amount is ${fake_loss_amount}")
+                        logger.info(f"Fake Loss amount is ${fake_loss_amount}") # code added
                         print(f"  Max limit: ${fake_loss_amount_maxlimit}")
 
                         # Adjust martingale if needed
@@ -1190,13 +1195,14 @@ def calculate_signals(df):
 if __name__ == "__main__":
     try:
         print("🚀 Starting Delta Exchange Trading Bot with Bracket Orders")
-        print(f"💰 Initial Capital: ${base_capital}")
+        print(f"💰 Initial Capital: Rs{base_capital}")
         print(f"⚡ Base Leverage: {base_leverage}x")
         print(f"📊 Symbol: {DELTA_SYMBOL}")
         print(f"⏰ Interval: {DELTA_INTERVAL}")
         print(f"✅ TP PERCENT: {DELTA_TP_PERCENT}")
         print(f"❌ SL BUFFER POINTS: {DELTA_SL_BUFFER_POINTS}")
-        logger.info(f"Fake Loss amount is ${fake_loss_amount}")
+        # logger.info(f"Fake Loss amount is ${fake_loss_amount}")
+        logger.info(f"The trading bot has started with initial capital {base_capital} and initial leverage {base_leverage} and symbol {DELTA_SYMBOL} and interval {DELTA_INTERVAL} with tp percent {DELTA_TP_PERCENT} and sl points {DELTA_SL_BUFFER_POINTS}")
         print("=" * 50)
         
         # Set initial leverage

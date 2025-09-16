@@ -41,7 +41,7 @@ END_HOUR = 23
 END_MINUTE = 59
 
 RENTRY_TIME_BINANCE = 900 # this is the time in seconds to enter once the trade has been closed for binance
-MASTER_HEIKEN_CHOICE = 0
+MASTER_HEIKEN_CHOICE = 1
 
 # DESIRED_TYPES = [1,2,3,-1,-2,-3]
 # DESIRED_TYPES = [-1,-2,-3] # only take sell trades 
@@ -94,26 +94,18 @@ Important Note -> always ensure that the code is saved properly CTRL+S before ex
 
 # CONFIG FOR THE DELTA EXCHANGE
 
-# DELTA_API_KEY = "lOZPIu6tVprsfrLRKM6cyssjX9xVLY"
-# DELTA_API_KEY = "BfUCEIS1HuMEVorlB58A7ZIGrxBjGZ"
-DELTA_API_KEY = "0EcBXCvWDj7DoJ7KGk1neDNxJA9FFE"
-# DELTA_API_SECRET = "sHylfG8esKDwVfn6a9XK8Tx1ogRdhOjzUoKSbbqll69sC2Pix7SP58c2joUu" 
-# DELTA_API_SECRET = "MP3D6f26Aue6UdXfa2oitSONCh6L3FutnuuoIdY2YZlztMwUkFbtRBlEBMma"
-DELTA_API_SECRET = "aO8Jr4PmcQi4lUiYm6y4qzuEGBdrq3oSYgsOUnChWDr3DZXlYzbSN2UbymBH"
+DELTA_API_KEY = "6hL1wLuSbhG4XffycMGMKJTAaCrA55"
+DELTA_API_SECRET = "Cz0RPLZMLdlI0PtU5anSgtLXvcXmeyTTQFc7PR8LkzwNMV6jpoAWauRgl7tr"
 DELTA_SYMBOL = "ETHUSD" # use ETHUSDT when using binance to fetch and use ETHUSD when using the delta-exchange to fetch
 DELTA_SYMBOL_PLACE_ORDER = "ETHUSD" # used for placing order
 DELTA_TOKEN = 3136 
 DELTA_MIN_LOT = 0.01
 DELTA_BASE_LEVERAGE = 10 # change the base leverage also
-DELTA_FAKE_LOSS_MAX_AMOUNT = 100 # this amount is in dollars 
+DELTA_FAKE_LOSS_MAX_AMOUNT = 0.5 # this amount is in dollars 
 DELTA_INTERVAL = "15m" 
 DELTA_SL_BUFFER_POINTS = 15
 DELTA_TP_PERCENT = 0.7
 DELTA_INITIAL_CAPITAL = 450
-DELTA_TRAILING_POINTS = 15
-DELTA_TRAILING_BUFFER = 15
-ENABLE_TRAILING_SL = True
-TRAILING_SL_PERCENT = 1
 
 """
 Delta Exchange Trading Configuration - `config.py`
