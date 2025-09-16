@@ -789,6 +789,11 @@ def format_trade_data(direction, entry_price, sl, tp, trade_amount, strategy_typ
         print(f"Error formatting trade data: {e}")
         return {}
 
+def set_flag_fake_trade(flag):
+    # here the value of 0/1 will be passed
+    global fake_trade_flag
+    fake_trade_flag = int(flag)
+
 def fake_trade_loss_checker(df, current_time):
     global fake_loss_amount, trade_taken_time, trade_taken_signal, trade_taken_price, trade_taken_direction
 
@@ -1325,7 +1330,8 @@ if __name__ == "__main__":
                 if martingale_manager.h_pos != 0:
                     if fake_trade_flag != 0:
                         fake_signal_with_position = fake_trade_loss_checker(df_position_check, delta_client.current_candle_time)
-                        fake_trade_flag = 0  # Reset flag regardless of result
+                        set_flag_fake_trade(0)
+                        logger.info(f"fake trade flag is reverted to {fake_trade_flag} , fake signal with position status is {fake_signal_with_position}")
                         if fake_signal_with_position:
                             print("🚨 Fake signal detected with active position!")
                     
@@ -1426,7 +1432,9 @@ if __name__ == "__main__":
                                 if market_order:
                                     print(f"✅ Market order placed: {market_order.get('id')}")
                                     set_trade_tracking(entry_signal, direction, entry_price, delta_client.current_candle_time)
-                                    fake_trade_flag = 1
+                                    # fake_trade_flag = 1
+                                    set_flag_fake_trade(1)
+                                    logger.info(f"since a new trade is being opened the fake trade flag is {fake_trade_flag}")
                                     # ===== END TRADE TRACKING (LOCATION 2) =====
                                     
                                     # Wait a moment for the order to fill
