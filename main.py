@@ -31,6 +31,8 @@ bracket_sl_order_id = None
 current_bracket_state_tp = None
 current_bracket_state_sl = None
 fake_trade_flag = 0
+candle_entry = None
+candle_exit = None
 
 class DeltaBroker:
     def __init__(self):
@@ -240,7 +242,7 @@ class DeltaBroker:
             # print(f"Error getting active positions: {e}")
             # import time
             # time.sleep(10) # keep this here - once every 500 times
-            logger.info(f"exception occured in get_active_positions so sleeping for 0 seconds")
+            # logger.info(f"exception occured in get_active_positions so sleeping for 0 seconds")
             try:
                 method = "GET"
                 path = "/v2/positions"
@@ -602,7 +604,8 @@ class MartingaleManager:
     def clear_position(self):
         """Clear position status when trade is closed"""
         try:
-            self.df = pd.read_csv(rf"C:\Users\vaibh\OneDrive\Desktop\alhem_2\trading_binance\Delta_Final.csv")
+            # self.df = pd.read_csv(rf"C:\Users\vaibh\OneDrive\Desktop\alhem_2\trading_binance\Delta_Final.csv")
+            self.df = pd.read_csv(r"Delta_Final.csv")
             self.h_pos = 0
             self.entry_signal = None
             self.position_order_id = None
@@ -665,7 +668,10 @@ class MartingaleManager:
                 # Close position
                 opposite_side = "sell" if self.last_direction == "buy" else "buy"
                 res = delta_client.place_order_market(side=opposite_side, size=self.last_quantity)
+
+                set_candle_exit_time(time=self.df.iloc[-1]['time'])
                 logger.info(f"since an opposite signal is detected now we have placed an order with response {res} , now the position status of self.h_pos is {self.h_pos}")
+                reset_candle_entry_exit_time() # no need for a sleep function here
                 
                 if res:
                     balance_after = float(delta_client.get_usd_balance())
@@ -704,7 +710,7 @@ class MartingaleManager:
             if self.h_pos == 0:
                 return False
 
-            print("🔍 Checking position status...")
+            print(f"  Checking position status...")
             print(f"  Direction: {self.last_direction}")
             print(f"  Entry: ${self.last_entry_price}")
             print(f"  SL: ${self.last_sl_price}")
@@ -731,14 +737,21 @@ class MartingaleManager:
                         self.update_trade_result('loss')
 
                     self.clear_position()
+                    set_candle_exit_time(self.df.iloc[-1]['time'])
 
-                    print("🛌 Sleeping for 900 seconds to avoid re-entry in same candle...")
-                    time.sleep(RENTRY_TIME_BINANCE)
-                    print("🔄 Ready for next trade opportunity")
+                    # print("🛌 Sleeping for 900 seconds to avoid re-entry in same candle...")
+                    if check_entry_exit_same_candle_condition():
+                        logger.info(f"here we are going to sleep for {RENTRY_TIME_BINANCE} since the entry and exit time is the same")
+                        time.sleep(RENTRY_TIME_BINANCE)
+                    else:
+                        logger.info(f"here we are not going to sleep since the entry and exit time is not same")
+                        time.sleep(0.5)
+                    reset_candle_entry_exit_time()
+                    print(" Ready for next trade opportunity")
                     return True
 
                 # Still open
-                print(f"📈 Order still open... TP state: {current_bracket_state_tp}, SL state: {current_bracket_state_sl}")
+                print(f" Order still open... TP state: {current_bracket_state_tp}, SL state: {current_bracket_state_sl}")
                 return False
 
             except Exception as e:
@@ -787,6 +800,27 @@ def format_trade_data(direction, entry_price, sl, tp, trade_amount, strategy_typ
     except Exception as e:
         print(f"Error formatting trade data: {e}")
         return {}
+    
+def set_candle_entry_time(time):
+    global candle_entry
+    candle_entry = time
+
+def set_candle_exit_time(time):
+    global candle_exit
+    candle_exit = time
+
+def reset_candle_entry_exit_time():
+    global candle_entry,candle_exit
+    candle_entry = None
+    candle_exit  = None
+
+def check_entry_exit_same_candle_condition():
+    # if this value is true then we need to put the function in sleep
+    global candle_entry,candle_exit
+    if candle_entry == candle_exit:
+        return True
+    else:
+        return False
 
 def set_flag_fake_trade(flag):
     # here the value of 0/1 will be passed
@@ -860,8 +894,14 @@ def fake_trade_loss_checker(df, current_time):
                         # Reset trade tracking
                         reset_trade_tracking()
                         import time
-                        print(f"sleeping for 900 seconds to prevent re-entry")
-                        time.sleep(RENTRY_TIME_BINANCE) # important rf_filter+ib_box don't form signals in consecutive candles 
+                        # print(f"sleeping for 900 seconds to prevent re-entry")
+                        if check_entry_exit_same_candle_condition():
+                            logger.info(f"here we are going to sleep for {RENTRY_TIME_BINANCE} since the entry and exit time is the same")
+                            time.sleep(RENTRY_TIME_BINANCE)
+                        else:
+                            logger.info(f"here we are not going to sleep since the entry and exit time is not same")
+                            time.sleep(0.5)
+                        reset_candle_entry_exit_time()
                         return True
                     else:
                         print("✅ Signal is still valid. No fake trade.")
@@ -904,10 +944,15 @@ def close_position_on_fake_signal():
                 logger.info(f"the sl / tp was hitted before the execution so no closing market order , sl status : {current_bracket_state_sl} , tp status : {current_bracket_state_tp}")
             else:
                 logger.info(f"the sl / tp was not hit so we are closing market order , sl status : {current_bracket_state_sl} , tp status : {current_bracket_state_tp}")
+                df = delta_client.fetch_data_binance()
+                df = calculate_signals(df)
+                df.to_csv('Delta_Final.csv')
                 close_order = delta_client.place_order_market(
                     side=opposite_direction, 
                     size=martingale_manager.last_quantity
                 )
+                set_candle_exit_time(time=df.iloc[-1]['time'])
+                reset_candle_entry_exit_time()
             
             if close_order:
                 print(f"✅ Position closed successfully: {close_order.get('id')}")
@@ -1335,6 +1380,8 @@ if __name__ == "__main__":
                             print("🚨 Fake signal detected with active position!")
                     
                     opposite_signal_exit = martingale_manager.check_opposite_signal()
+                    df = pd.read_csv("Delta_Final.csv")
+                    print(f"current entry signal is {entry_signal} and current signal is {df.iloc[-1]['Signal_Final']}")
     
                     if opposite_signal_exit:
                         print("🚨 Position closed due to opposite signal!")
@@ -1425,7 +1472,8 @@ if __name__ == "__main__":
                                 current_price = delta_client.get_market_price()
                                 logger.info(f"current_price is {current_price} before placing the market order")
                                 print(f"market size is ")
-                                market_order = delta_client.place_order_market(direction, trade_amount)
+                                market_order = delta_client.place_order_market(direction, trade_amount) # this is where the market order is placed , only place where the entry candle is set
+                                set_candle_entry_time(time=df.iloc[-1]['time'])
                                 logger.info(f"the market order has been placed and response is {market_order}")
                                 martingale_manager.balance_before = delta_client.get_usd_balance() # here we set the initial balance while taking the trade and then we subract the price after exit from it
                                 martingale_manager.h_pos = int(entry_signal / 2) # this will work since the entry condition is only 2 
@@ -1460,10 +1508,10 @@ if __name__ == "__main__":
                                         print(f"Initial bracket order failed {e}")
                                         time.sleep(1) # important - can't change 
                                         if direction.lower() == 'buy':
-                                            sl = round(sl-15,2)
+                                            sl = round(sl-7,2)
                                             tp = round(tp+5,2)
                                         elif direction.lower() == 'sell':
-                                            sl = round(sl+15,2)
+                                            sl = round(sl+7,2)
                                             tp = round(tp-5,2)
                                         else:
                                             print(f"Invalid direction {direction}")
@@ -1486,11 +1534,12 @@ if __name__ == "__main__":
                                                 logger.info(f"since the fallback market order also failed we are closing the order at {current_price}")
                                                 delta_client.place_order_market(side='sell',size=martingale_manager.last_quantity)
                                                 martingale_manager.clear_position()
+                                                reset_candle_entry_exit_time()
                                             else:
                                                 logger.info(f"since the fallback market order also failed we are closing the order at {current_price}")
                                                 delta_client.place_order_market(side='buy',size=martingale_manager.last_quantity)
                                                 martingale_manager.clear_position()
-                                        
+                                                reset_candle_entry_exit_time()
                                     try:
                                         bracket_tp_order_id = bracket_order_res['result']['take_profit_order']['id']
                                         bracket_sl_order_id = bracket_order_res['result']['stop_loss_order']['id']
