@@ -818,8 +818,10 @@ def check_entry_exit_same_candle_condition():
     # if this value is true then we need to put the function in sleep
     global candle_entry,candle_exit
     if candle_entry == candle_exit:
+        reset_candle_entry_exit_time()
         return True
     else:
+        reset_candle_entry_exit_time()
         return False
 
 def set_flag_fake_trade(flag):
