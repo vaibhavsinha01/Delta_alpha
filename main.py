@@ -68,7 +68,7 @@ class DeltaBroker:
         try:
             payload = {
                 "product_symbol": self.product_symbol_place_order,
-                "size": size,
+                "size": abs(size),
                 "side": side,
                 "order_type": "market_order",
                 "time_in_force": "gtc"
@@ -345,7 +345,6 @@ class DeltaBroker:
             # Calculate position size: (capital * leverage) / price
             position_value = base_capital * leverage
             quantity = position_value / current_price
-            
             # Ensure minimum quantity
             if quantity < self.min_lot:
                 quantity = self.min_lot
@@ -1425,6 +1424,7 @@ if __name__ == "__main__":
                                 # current_candle_time = df.iloc[-1]['time']
                                 current_price = delta_client.get_market_price()
                                 logger.info(f"current_price is {current_price} before placing the market order")
+                                print(f"market size is ")
                                 market_order = delta_client.place_order_market(direction, trade_amount)
                                 logger.info(f"the market order has been placed and response is {market_order}")
                                 martingale_manager.balance_before = delta_client.get_usd_balance() # here we set the initial balance while taking the trade and then we subract the price after exit from it

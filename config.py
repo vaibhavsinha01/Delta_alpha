@@ -105,7 +105,7 @@ DELTA_FAKE_LOSS_MAX_AMOUNT = 0.5 # this amount is in dollars
 DELTA_INTERVAL = "5m" 
 DELTA_SL_BUFFER_POINTS = 10
 DELTA_TP_PERCENT = 0.5
-DELTA_INITIAL_CAPITAL = 450
+DELTA_INITIAL_CAPITAL = 550
 
 """
 Delta Exchange Trading Configuration - `config.py`
