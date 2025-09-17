@@ -647,7 +647,7 @@ class MartingaleManager:
             current_signal = int(latest_candle['Signal_Final'])     
             
             if self.entry_signal is None:
-                logger.info("No entry signal recorded")
+                # logger.info("No entry signal recorded")
                 return False
 
             if current_signal == 0:
@@ -1426,6 +1426,7 @@ if __name__ == "__main__":
                                 current_price = delta_client.get_market_price()
                                 logger.info(f"current_price is {current_price} before placing the market order")
                                 market_order = delta_client.place_order_market(direction, trade_amount)
+                                logger.info(f"the market order has been placed and response is {market_order}")
                                 martingale_manager.balance_before = delta_client.get_usd_balance() # here we set the initial balance while taking the trade and then we subract the price after exit from it
                                 martingale_manager.h_pos = int(entry_signal / 2) # this will work since the entry condition is only 2 
                                 
@@ -1452,6 +1453,7 @@ if __name__ == "__main__":
                                             take_profit_price=tp
                                         )
                                         print(f"bracket order res is {bracket_order_res}")
+                                        logger.info(f"bracket order response is {bracket_order_res}")
                                         if not bracket_order_res or not bracket_order_res.get('success',False):
                                             raise Exception("Bracket order placement failed")
                                     except Exception as e:
