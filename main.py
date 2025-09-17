@@ -678,6 +678,7 @@ class MartingaleManager:
                 if res:
                     balance_after = float(delta_client.get_usd_balance())
                     loss_amount = balance_before - balance_after
+                    logger.info(f"opposite signal loss amount is {loss_amount}")
                     
                     # Add to global fake_loss_amount
                     global fake_loss_amount
@@ -944,7 +945,7 @@ def close_position_on_fake_signal():
             sl_res = delta_client.get_order_status(order_id=bracket_sl_order_id)
             current_bracket_state_sl = sl_res['result']['state']
             # logger.info(f"the current sl status is {current_bracket_state_sl} and the current tp status is {current_bracket_state_tp}")
-            if current_bracket_state_sl == "FILLED" or current_bracket_state_tp == "FILLED": # this logic is correct
+            if current_bracket_state_sl == "FILLED" or current_bracket_state_tp == "FILLED" or current_bracket_state_sl == "closed" or current_bracket_state_tp == "closed": # this logic is correct
                 logger.info(f"the sl / tp was hitted before the execution so no closing market order , sl status : {current_bracket_state_sl} , tp status : {current_bracket_state_tp}")
             else:
                 logger.info(f"the sl / tp was not hit so we are closing market order , sl status : {current_bracket_state_sl} , tp status : {current_bracket_state_tp}")
