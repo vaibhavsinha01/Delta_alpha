@@ -605,7 +605,9 @@ class MartingaleManager:
         """Clear position status when trade is closed"""
         try:
             # self.df = pd.read_csv(rf"C:\Users\vaibh\OneDrive\Desktop\alhem_2\trading_binance\Delta_Final.csv")
-            self.df = pd.read_csv(r"Delta_Final.csv")
+            # self.df = pd.read_csv(r"Delta_Final.csv")
+            self.df = delta_client.fetch_data_binance()
+            self.df = calculate_signals(df)
             self.h_pos = 0
             self.entry_signal = None
             self.position_order_id = None
@@ -1382,7 +1384,9 @@ if __name__ == "__main__":
                             print("🚨 Fake signal detected with active position!")
                     
                     opposite_signal_exit = martingale_manager.check_opposite_signal()
-                    df = pd.read_csv("Delta_Final.csv")
+                    # df = pd.read_csv("Delta_Final.csv")
+                    df = delta_client.fetch_data_binance()
+                    df = calculate_signals(df)
                     print(f"current entry signal is {entry_signal} and current signal is {df.iloc[-1]['Signal_Final']}")
     
                     if opposite_signal_exit:
