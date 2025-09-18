@@ -636,6 +636,7 @@ class MartingaleManager:
                 else:
                     self.current_level += 1
                     print(f"Trade lost! Moving to level {self.current_level}, leverage: {self.get_leverage()}x")
+            logger.info(f"the current leverage level is {self.current_level}")
         except Exception as e:
             print(f"Error updating trade result: {e}")
 
@@ -898,6 +899,7 @@ def fake_trade_loss_checker(df, current_time):
 
                         # Reset trade tracking
                         reset_trade_tracking()
+                        logger.info(f"the current martingale level is {martingale_manager.current_level}")
                         import time
                         # print(f"sleeping for 900 seconds to prevent re-entry")
                         if check_entry_exit_same_candle_condition():
@@ -915,6 +917,7 @@ def fake_trade_loss_checker(df, current_time):
                     print("🕒 Waiting for new candle... Sleeping 2 seconds.")
                     import time
                     time.sleep(2) # important 
+                
 
     except Exception as e:
         print(f"⚠️ Error in fake_trade_loss_checker: {e}")
@@ -1326,7 +1329,7 @@ if __name__ == "__main__":
         print(f"✅ TP PERCENT: {DELTA_TP_PERCENT}")
         print(f"❌ SL BUFFER POINTS: {DELTA_SL_BUFFER_POINTS}")
         # logger.info(f"Fake Loss amount is ${fake_loss_amount}")
-        logger.info(f"The trading bot has started with initial capital {base_capital} and initial leverage {base_leverage} and symbol {DELTA_SYMBOL} and interval {DELTA_INTERVAL} with tp percent {DELTA_TP_PERCENT} and sl points {DELTA_SL_BUFFER_POINTS}")
+        logger.info(f"The trading bot has started with initial capital {base_capital} and initial leverage {base_leverage} and symbol {DELTA_SYMBOL} and interval {DELTA_INTERVAL} with tp percent {DELTA_TP_PERCENT} and sl points {DELTA_SL_BUFFER_POINTS} current fake loss amount is {fake_loss_amount} and current martingale level is {martingale_manager.current_level}")
         print("=" * 50)
         
         # Set initial leverage
