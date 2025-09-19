@@ -6,7 +6,7 @@
 BINANCE_API_KEY = "34nj4RR3uMcECFaa8OIf6v4zSls2MzqmT952KpWVf2TmWSXPznJFKzFjh3555JgT"
 BINANCE_API_SECRET = "GMBWYiKYfrnRMyAzBVQzVQ3pNyXZovQSIUhN1c69oszwmaY5LPSvQbV7qhjiweq5"
 BINANCE_SYMBOL = 'ETHUSDT'  # Trading pair - changed from BTCUSDT
-BINANCE_INTERVAL = '15m'  # Candle intervals
+BINANCE_INTERVAL = '1m'  # Candle intervals
 BINANCE_TESTNET_STATUS = 0 # use this to trade on the testnet and set the value to 0 to trade on the mainnet , remainder that there are separate api_keys,api_secrets for the binance_testnet_status
 
 # Don't change the variables here they have nothing to do with the values in the code in main file
@@ -94,18 +94,18 @@ Important Note -> always ensure that the code is saved properly CTRL+S before ex
 
 # CONFIG FOR THE DELTA EXCHANGE
 
-DELTA_API_KEY = "6hL1wLuSbhG4XffycMGMKJTAaCrA55"
-DELTA_API_SECRET = "Cz0RPLZMLdlI0PtU5anSgtLXvcXmeyTTQFc7PR8LkzwNMV6jpoAWauRgl7tr"
+DELTA_API_KEY = "1367ycCkIrkpjJNeG2F7JVD0EEHh90"
+DELTA_API_SECRET = "PT4LHqAnx11pb3KD4NvwB87fHIzWLxxsju91tJW9CQdbMPAxI539gDOKxSwI"
 DELTA_SYMBOL = "ETHUSD" # use ETHUSDT when using binance to fetch and use ETHUSD when using the delta-exchange to fetch
 DELTA_SYMBOL_PLACE_ORDER = "ETHUSD" # used for placing order
-DELTA_TOKEN = 3136 
+DELTA_TOKEN = 3136
 DELTA_MIN_LOT = 0.01
-DELTA_BASE_LEVERAGE = 10 # change the base leverage also
+DELTA_BASE_LEVERAGE = 5 # change the base leverage also
 DELTA_FAKE_LOSS_MAX_AMOUNT = 0.1 # this amount is in dollars 
-DELTA_INTERVAL = "15m" 
-DELTA_SL_BUFFER_POINTS = 15
-DELTA_TP_PERCENT = 0.7
-DELTA_INITIAL_CAPITAL = 4000
+DELTA_INTERVAL = "1m" 
+DELTA_SL_BUFFER_POINTS = 4
+DELTA_TP_PERCENT = 0.18
+DELTA_INITIAL_CAPITAL = 1000
 
 """
 Delta Exchange Trading Configuration - `config.py`
