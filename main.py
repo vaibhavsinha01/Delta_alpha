@@ -674,10 +674,12 @@ class MartingaleManager:
                     logger.info(f"the closing order is being placed , the opposite direction is {opposite_side} since the last direction was {self.last_direction}")
                     res = delta_client.place_order_market(side=str(opposite_side), size=int(self.last_quantity))
                     self.h_pos = 0
+                    reset_trade_tracking()
 
                     set_candle_exit_time(time=self.df.iloc[-1]['time'])
                     logger.info(f"since an opposite signal is detected now we have placed an order with response {res} , now the position status of self.h_pos is {self.h_pos}")
                     reset_candle_entry_exit_time() # no need for a sleep function here
+                    martingale_manager.clear_position()
                     
                     if res:
                         balance_after = float(delta_client.get_usd_balance())
