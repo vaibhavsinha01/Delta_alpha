@@ -659,51 +659,54 @@ class MartingaleManager:
                 return False  # Zero signal is not an opposite signal
 
             # Check for true opposite signals (different signs, both non-zero)
-            if (self.entry_signal == 2 and current_signal == -2) or \
-            (self.entry_signal == -2 and current_signal == 2):    
-            
-                logger.info(f"Opposite signal detected! Entry: {self.entry_signal}, Current: {current_signal}")
+            if self.h_pos != 0:
+                if (self.entry_signal == 2 and current_signal == -2) or \
+                (self.entry_signal == -2 and current_signal == 2):    
                 
-                # Get balance before closing
-                # balance_before = float(delta_client.get_usd_balance())
-                balance_before = martingale_manager.balance_before
-                
-                # Close position
-                opposite_side = "sell" if self.last_direction == "buy" else "buy"
-                res = delta_client.place_order_market(side=opposite_side, size=self.last_quantity)
-
-                set_candle_exit_time(time=self.df.iloc[-1]['time'])
-                logger.info(f"since an opposite signal is detected now we have placed an order with response {res} , now the position status of self.h_pos is {self.h_pos}")
-                reset_candle_entry_exit_time() # no need for a sleep function here
-                
-                if res:
-                    balance_after = float(delta_client.get_usd_balance())
-                    loss_amount = balance_before - balance_after
-                    logger.info(f"opposite signal loss amount is {loss_amount}")
+                    logger.info(f"Opposite signal detected! Entry: {self.entry_signal}, Current: {current_signal}")
                     
-                    # Add to global fake_loss_amount
-                    global fake_loss_amount
+                    # Get balance before closing
+                    # balance_before = float(delta_client.get_usd_balance())
+                    balance_before = martingale_manager.balance_before
+                    
+                    # Close position
+                    opposite_side = "sell" if self.last_direction == "buy" else "buy"
+                    logger.info(f"the closing order is being placed , the opposite direction is {opposite_side} since the last direction was {self.last_direction}")
+                    res = delta_client.place_order_market(side=str(opposite_side), size=int(self.last_quantity))
+                    self.h_pos = 0
 
-                    if loss_amount > 0:  # Only add actual losses
-                        fake_loss_amount += loss_amount
-                        print(f"Loss from opposite signal: ${loss_amount:.2f}")
-                        print(f"Total fake loss: ${fake_loss_amount:.2f}")
+                    set_candle_exit_time(time=self.df.iloc[-1]['time'])
+                    logger.info(f"since an opposite signal is detected now we have placed an order with response {res} , now the position status of self.h_pos is {self.h_pos}")
+                    reset_candle_entry_exit_time() # no need for a sleep function here
+                    
+                    if res:
+                        balance_after = float(delta_client.get_usd_balance())
+                        loss_amount = balance_before - balance_after
+                        logger.info(f"opposite signal loss amount is {loss_amount}")
                         
-                        # Check if fake loss limit reached
-                        if fake_loss_amount >= fake_loss_amount_maxlimit:
-                            if self.current_level < self.max_levels - 1:
-                                self.current_level += 1
-                            else:
-                                self.current_level = 0
-                            fake_loss_amount = 0
-                    
-                    logger.info(f"a balance amount of {loss_amount:.2f} is incremented to the fake trade loss , the balance before was {balance_before} and the balance after is {balance_after} the total balance till now is {fake_loss_amount:.2f} and max limit is {fake_loss_amount_maxlimit} and the current level is {self.current_level}")
-                    
-                    self.clear_position()
-                    # time.sleep(2)
-                    return True
-            
-            return False
+                        # Add to global fake_loss_amount
+                        global fake_loss_amount
+
+                        if loss_amount > 0:  # Only add actual losses
+                            fake_loss_amount += loss_amount
+                            print(f"Loss from opposite signal: ${loss_amount:.2f}")
+                            print(f"Total fake loss: ${fake_loss_amount:.2f}")
+                            
+                            # Check if fake loss limit reached
+                            if fake_loss_amount >= fake_loss_amount_maxlimit:
+                                if self.current_level < self.max_levels - 1:
+                                    self.current_level += 1
+                                else:
+                                    self.current_level = 0
+                                fake_loss_amount = 0
+                        
+                        logger.info(f"a balance amount of {loss_amount:.2f} is incremented to the fake trade loss , the balance before was {balance_before} and the balance after is {balance_after} the total balance till now is {fake_loss_amount:.2f} and max limit is {fake_loss_amount_maxlimit} and the current level is {self.current_level}")
+                        
+                        self.clear_position()
+                        # time.sleep(2)
+                        return True
+                
+                return False
             
         except Exception as e:
             print(f"Error checking opposite signal: {e}")
