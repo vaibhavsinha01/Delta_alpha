@@ -681,15 +681,16 @@ class MartingaleManager:
                     reset_candle_entry_exit_time() # no need for a sleep function here
                     martingale_manager.clear_position()
                     
-                    if res:
-                        balance_after = float(delta_client.get_usd_balance())
-                        loss_amount = balance_before - balance_after
-                        logger.info(f"opposite signal loss amount is {loss_amount}")
+                    # if res:
                         
-                        # Add to global fake_loss_amount
-                        global fake_loss_amount
+                    balance_after = float(delta_client.get_usd_balance())
+                    loss_amount = balance_before - balance_after
+                    logger.info(f"opposite signal loss amount is {loss_amount}")
+                        
+                    # Add to global fake_loss_amount
+                    global fake_loss_amount
 
-                        if loss_amount > 0:  # Only add actual losses
+                    if loss_amount > 0:  # Only add actual losses
                             fake_loss_amount += loss_amount
                             print(f"Loss from opposite signal: ${loss_amount:.2f}")
                             print(f"Total fake loss: ${fake_loss_amount:.2f}")
@@ -702,11 +703,11 @@ class MartingaleManager:
                                     self.current_level = 0
                                 fake_loss_amount = 0
                         
-                        logger.info(f"a balance amount of {loss_amount:.2f} is incremented to the fake trade loss , the balance before was {balance_before} and the balance after is {balance_after} the total balance till now is {fake_loss_amount:.2f} and max limit is {fake_loss_amount_maxlimit} and the current level is {self.current_level}")
+                    logger.info(f"a balance amount of {loss_amount:.2f} is incremented to the fake trade loss , the balance before was {balance_before} and the balance after is {balance_after} the total balance till now is {fake_loss_amount:.2f} and max limit is {fake_loss_amount_maxlimit} and the current level is {self.current_level}")
                         
-                        self.clear_position()
-                        # time.sleep(2)
-                        return True
+                    self.clear_position()
+                    # time.sleep(2)
+                    return True
                 
                 return False
             
@@ -741,8 +742,10 @@ class MartingaleManager:
                     if current_bracket_state_tp == "closed":
                         logger.info(f"we have won the trade")
                         self.update_trade_result('win')
+                        logger.info(f"current martingale level is {martingale_manager.current_level} and the current fake loss is {fake_loss_amount}")
                     elif current_bracket_state_sl == "closed":
                         logger.info(f"we have lost the trade")
+                        logger.info(f"current martingale level is {martingale_manager.current_level} and the current fake loss is {fake_loss_amount}")
                         self.update_trade_result('loss')
 
                     self.clear_position()
