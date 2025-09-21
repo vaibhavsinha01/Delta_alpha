@@ -106,6 +106,7 @@ DELTA_INTERVAL = "15m"
 DELTA_SL_BUFFER_POINTS = 15
 DELTA_TP_PERCENT = 0.6
 DELTA_INITIAL_CAPITAL = 4000
+N_CANDLE_LOOKBACK = 10
 
 """
 Delta Exchange Trading Configuration - `config.py`
