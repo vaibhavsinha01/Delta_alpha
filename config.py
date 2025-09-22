@@ -47,7 +47,7 @@ MASTER_HEIKEN_CHOICE = 1
 # DESIRED_TYPES = [-1,-2,-3] # only take sell trades 
 # DESIRED_TYPES = [1,2,3] # only take buy trades
 # DESIRED_TYPES = [1,2,3,-1,-2,-3]
-DESIRED_TYPES = [2,-2]
+DESIRED_TYPES = [2,4,-2,-4]
 """
 Configuration File - `config.py`
 Important Note -> always ensure that the code is saved properly CTRL+S before exiting
@@ -106,7 +106,7 @@ DELTA_INTERVAL = "15m"
 DELTA_SL_BUFFER_POINTS = 15
 DELTA_TP_PERCENT = 0.6
 DELTA_INITIAL_CAPITAL = 4000
-N_CANDLE_LOOKBACK = 10
+N_CANDLE_LOOKBACK = 5
 
 """
 Delta Exchange Trading Configuration - `config.py`
