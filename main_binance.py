@@ -9,7 +9,7 @@ from module.rsi_buy_sell import RSIBuySellIndicator
 from binance_client_ import BinanceClient
 from important import *
 import warnings
-from websocket_data_binance import WebsocketClass
+from utils.websocket_data_binance import WebsocketClass
 
 # Suppress specific FutureWarnings from pandas
 warnings.simplefilter(action='ignore', category=FutureWarning)

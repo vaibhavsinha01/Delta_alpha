@@ -6,7 +6,7 @@
 BINANCE_API_KEY = "34nj4RR3uMcECFaa8OIf6v4zSls2MzqmT952KpWVf2TmWSXPznJFKzFjh3555JgT"
 BINANCE_API_SECRET = "GMBWYiKYfrnRMyAzBVQzVQ3pNyXZovQSIUhN1c69oszwmaY5LPSvQbV7qhjiweq5"
 BINANCE_SYMBOL = 'ETHUSDT'  # Trading pair - changed from BTCUSDT
-BINANCE_INTERVAL = '15m'  # Candle intervals
+BINANCE_INTERVAL = '1m'  # Candle intervals
 BINANCE_TESTNET_STATUS = 0 # use this to trade on the testnet and set the value to 0 to trade on the mainnet , remainder that there are separate api_keys,api_secrets for the binance_testnet_status
 
 # Don't change the variables here they have nothing to do with the values in the code in main file
@@ -31,7 +31,6 @@ BINANCE_BASE_LEVERAGE = 10
 # Strategy Control - instead of this you can run separate files for different strategies - don't change
 A = 0 
 K = 0  
-
 INITIAL_CAPITAL = 10000  # Initial trading amount in USDT - used to trade
 
 # HERE PLEASE MAKE USE OF THE MILITARY TIMINGS SO 15:30 MEANS 3:30 PM AND THIS IS FOR THE INDIAN STANDARD TIME
@@ -40,7 +39,7 @@ START_MINUTE = 00
 END_HOUR = 23
 END_MINUTE = 59
 
-RENTRY_TIME_BINANCE = 900 # this is the time in seconds to enter once the trade has been closed for binance
+RENTRY_TIME_BINANCE = 60 # this is the time in seconds to enter once the trade has been closed for binance
 MASTER_HEIKEN_CHOICE = 1
 
 # DESIRED_TYPES = [1,2,3,-1,-2,-3]
@@ -102,10 +101,10 @@ DELTA_TOKEN = 3136
 DELTA_MIN_LOT = 0.01
 DELTA_BASE_LEVERAGE = 10 # change the base leverage also
 DELTA_FAKE_LOSS_MAX_AMOUNT = 1 # this amount is in dollars 
-DELTA_INTERVAL = "15m" 
-DELTA_SL_BUFFER_POINTS = 15
-DELTA_TP_PERCENT = 0.6
-DELTA_INITIAL_CAPITAL = 4000
+DELTA_INTERVAL = "1m" 
+DELTA_SL_BUFFER_POINTS = 5
+DELTA_TP_PERCENT = 0.13
+DELTA_INITIAL_CAPITAL = 600
 N_CANDLE_LOOKBACK = 5
 
 """
