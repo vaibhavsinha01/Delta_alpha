@@ -1133,72 +1133,77 @@ class RangeFilter:
         return hi_band1, lo_band1, rfilt1
     
     def calculate_signals(self, 
-                         close: np.array, 
-                         filter_line: np.array) -> Tuple[np.array, np.array, np.array]:
+                     close: np.array, 
+                     filter_line: np.array) -> Tuple[np.array, np.array, np.array]:
         """
-        Calculate buy/sell signals based on filter - Fixed to match Pine Script exactly
+        Calculate buy/sell signals based on filter
+        Real-time signal generation - signals appear immediately when conditions are met
         """
-        # Filter direction calculation - matches Pine Script fdir logic
+        # Filter direction calculation
         fdir = np.zeros_like(filter_line)
-        fdir_value = 0.0  # Persistent variable like Pine Script
+        fdir_value = 0.0
         
         for i in range(1, len(filter_line)):
             if filter_line[i] > filter_line[i-1]:
                 fdir_value = 1
             elif filter_line[i] < filter_line[i-1]:
                 fdir_value = -1
-            # else fdir_value remains unchanged
             fdir[i] = fdir_value
         
         upward = (fdir == 1).astype(int)
         downward = (fdir == -1).astype(int)
         
-        # Trading conditions - exact match to Pine Script
+        # Trading conditions
         prev_close = np.roll(close, 1)
-        prev_close[0] = close[0]  # Handle first bar
+        prev_close[0] = close[0]
         
         long_cond = ((close > filter_line) & (close > prev_close) & (upward > 0)) | \
-                   ((close > filter_line) & (close < prev_close) & (upward > 0))
+                ((close > filter_line) & (close < prev_close) & (upward > 0))
         
         short_cond = ((close < filter_line) & (close < prev_close) & (downward > 0)) | \
                     ((close < filter_line) & (close > prev_close) & (downward > 0))
         
-        # CondIni logic - matches Pine Script exactly
+        # CondIni logic - Current position state
         cond_ini = np.zeros_like(close)
-        cond_ini_value = 0  # Persistent variable
+        cond_ini_value = 0
         
         for i in range(len(close)):
             if long_cond[i]:
                 cond_ini_value = 1
             elif short_cond[i]:
                 cond_ini_value = -1
-            # else cond_ini_value remains unchanged
             cond_ini[i] = cond_ini_value
         
-        # Generate buy/sell signals - exact Pine Script logic
-        prev_cond_ini = np.roll(cond_ini, 1)
-        prev_cond_ini[0] = 0  # Handle first bar
+        # Generate signals when position state CHANGES
+        buy_signals = np.zeros_like(close, dtype=bool)
+        sell_signals = np.zeros_like(close, dtype=bool)
         
-        buy_signals = long_cond & (prev_cond_ini == -1)
-        sell_signals = short_cond & (prev_cond_ini == 1)
+        for i in range(1, len(close)):
+            # Buy signal: transition from short/neutral (-1 or 0) to long (1)
+            if cond_ini[i] == 1 and cond_ini[i-1] != 1:
+                buy_signals[i] = True
+            # Sell signal: transition from long/neutral (1 or 0) to short (-1)
+            elif cond_ini[i] == -1 and cond_ini[i-1] != -1:
+                sell_signals[i] = True
         
         return buy_signals, sell_signals, fdir
-    
+
     def run_filter(self,
-                   df: pd.DataFrame,
-                   filter_type: str = "Type 1",
-                   movement_source: str = "Close",
-                   range_quantity: float = 2.618,
-                   range_scale: str = "Average Change",
-                   range_period: int = 14,
-                   smooth_range: bool = True,
-                   smooth_period: int = 27,
-                   average_filter: bool = True,
-                   average_samples: int = 2,
-                   point_value: float = 1.0,
-                   tick_size: float = 0.01) -> pd.DataFrame:
+                df: pd.DataFrame,
+                filter_type: str = "Type 1",
+                movement_source: str = "Close",
+                range_quantity: float = 2.618,
+                range_scale: str = "Average Change",
+                range_period: int = 14,
+                smooth_range: bool = True,
+                smooth_period: int = 27,
+                average_filter: bool = True,
+                average_samples: int = 2,
+                point_value: float = 1.0,
+                tick_size: float = 0.01) -> pd.DataFrame:
         """
         Main function to run the Range Filter on OHLC data
+        Real-time signal generation version
         
         Parameters:
         -----------
@@ -1211,8 +1216,7 @@ class RangeFilter:
         range_quantity : float
             Range size multiplier
         range_scale : str
-            Scale type for range calculation ("Points", "Pips", "Ticks", "% of Price", 
-            "ATR", "Average Change", "Standard Deviation", "Absolute")
+            Scale type for range calculation
         range_period : int
             Period for range calculations
         smooth_range : bool
@@ -1243,56 +1247,443 @@ class RangeFilter:
         result_df = df.copy()
         
         # Extract OHLC data
-        high = df['High'].values
-        low = df['Low'].values
-        close = df['Close'].values
+        high = df['High'].values.astype(float)
+        low = df['Low'].values.astype(float)
+        close = df['Close'].values.astype(float)
         
         # Determine high/low values based on movement source
         if movement_source == "Wicks":
-            h_val = high
-            l_val = low
+            h_val = high.copy()
+            l_val = low.copy()
         else:  # Close
-            h_val = close
-            l_val = close
+            h_val = close.copy()
+            l_val = close.copy()
         
         # Calculate average price for range calculation
         avg_price = (h_val + l_val) / 2
         
-        # Calculate range size
+        # Calculate range size using the average price
         range_size = self.calculate_range_size(
             avg_price, high, low, close, range_scale, 
             range_quantity, range_period, point_value, tick_size
         )
         
-        # Calculate Range Filter
-        hi_band, lo_band, filter_line = self.range_filter(
-            h_val, l_val, range_size, range_period, filter_type,
-            smooth_range, smooth_period, average_filter, average_samples
-        )
+        # Smooth the range if requested
+        if smooth_range:
+            condition = np.ones_like(range_size, dtype=bool)
+            r = self.conditional_ema(range_size, condition, smooth_period)
+        else:
+            r = range_size.copy()
         
-        # Calculate signals
-        buy_signals, sell_signals, trend_direction = self.calculate_signals(close, filter_line)
+        # Initialize the filter
+        rfilt = np.full(len(h_val), np.nan, dtype=float)
+        rfilt[0] = (h_val[0] + l_val[0]) / 2
+        
+        # Calculate filter values iteratively
+        for i in range(1, len(h_val)):
+            rfilt[i] = rfilt[i-1]  # Default: keep previous value
+            
+            if filter_type == "Type 1":
+                # Type 1: Direct comparison with range threshold
+                if h_val[i] - r[i] > rfilt[i-1]:
+                    rfilt[i] = h_val[i] - r[i]
+                elif l_val[i] + r[i] < rfilt[i-1]:
+                    rfilt[i] = l_val[i] + r[i]
+                    
+            elif filter_type == "Type 2":
+                # Type 2: Step-based movement
+                if h_val[i] >= rfilt[i-1] + r[i]:
+                    steps = np.floor(np.abs(h_val[i] - rfilt[i-1]) / r[i])
+                    rfilt[i] = rfilt[i-1] + steps * r[i]
+                elif l_val[i] <= rfilt[i-1] - r[i]:
+                    steps = np.floor(np.abs(l_val[i] - rfilt[i-1]) / r[i])
+                    rfilt[i] = rfilt[i-1] - steps * r[i]
+        
+        # Calculate initial bands
+        hi_band1 = rfilt + r
+        lo_band1 = rfilt - r
+        
+        # Apply conditional averaging if requested
+        if average_filter:
+            # Detect filter changes
+            filter_changes = np.zeros(len(rfilt), dtype=bool)
+            filter_changes[0] = True
+            filter_changes[1:] = rfilt[1:] != rfilt[:-1]
+            
+            # Apply conditional EMA only when filter changes
+            rfilt_final = self.conditional_ema(rfilt, filter_changes, average_samples)
+            hi_band_final = self.conditional_ema(hi_band1, filter_changes, average_samples)
+            lo_band_final = self.conditional_ema(lo_band1, filter_changes, average_samples)
+        else:
+            rfilt_final = rfilt
+            hi_band_final = hi_band1
+            lo_band_final = lo_band1
+        
+        # Calculate signals using the close price
+        buy_signals, sell_signals, trend_direction = self.calculate_signals(close, rfilt_final)
         
         # Add results to DataFrame
-        result_df['RF_UpperBand'] = hi_band
-        result_df['RF_LowerBand'] = lo_band
-        result_df['RF_Filter'] = filter_line
+        result_df['RF_UpperBand'] = hi_band_final
+        result_df['RF_LowerBand'] = lo_band_final
+        result_df['RF_Filter'] = rfilt_final
         result_df['RF_Trend'] = trend_direction
         result_df['RF_BuySignal'] = buy_signals.astype(int)
         result_df['RF_SellSignal'] = sell_signals.astype(int)
         
+        # Add current position state for easier tracking
+        # Calculate CondIni to show current position
+        position_state = np.zeros(len(close))
+        prev_close_arr = np.roll(close, 1)
+        prev_close_arr[0] = close[0]
+        
+        upward_state = (trend_direction == 1).astype(int)
+        downward_state = (trend_direction == -1).astype(int)
+        
+        long_cond = ((close > rfilt_final) & (close > prev_close_arr) & (upward_state > 0)) | \
+                ((close > rfilt_final) & (close < prev_close_arr) & (upward_state > 0))
+        
+        short_cond = ((close < rfilt_final) & (close < prev_close_arr) & (downward_state > 0)) | \
+                    ((close < rfilt_final) & (close > prev_close_arr) & (downward_state > 0))
+        
+        pos_value = 0
+        for i in range(len(close)):
+            if long_cond[i]:
+                pos_value = 1
+            elif short_cond[i]:
+                pos_value = -1
+            position_state[i] = pos_value
+        
+        result_df['RF_Position'] = position_state.astype(int)
+        
         # Store results for potential plotting
         self.results = {
             'df': result_df,
-            'filter_line': filter_line,
-            'upper_band': hi_band,
-            'lower_band': lo_band,
+            'filter_line': rfilt_final,
+            'upper_band': hi_band_final,
+            'lower_band': lo_band_final,
             'buy_signals': buy_signals,
             'sell_signals': sell_signals,
             'trend_direction': trend_direction
         }
         
         return result_df
+    
+    # def calculate_signals(self, 
+    #                      close: np.array, 
+    #                      filter_line: np.array) -> Tuple[np.array, np.array, np.array]:
+    #     """
+    #     Calculate buy/sell signals based on filter - Fixed to match Pine Script exactly
+    #     """
+    #     # Filter direction calculation - matches Pine Script fdir logic
+    #     fdir = np.zeros_like(filter_line)
+    #     fdir_value = 0.0  # Persistent variable like Pine Script
+        
+    #     for i in range(1, len(filter_line)):
+    #         if filter_line[i] > filter_line[i-1]:
+    #             fdir_value = 1
+    #         elif filter_line[i] < filter_line[i-1]:
+    #             fdir_value = -1
+    #         # else fdir_value remains unchanged
+    #         fdir[i] = fdir_value
+        
+    #     upward = (fdir == 1).astype(int)
+    #     downward = (fdir == -1).astype(int)
+        
+    #     # Trading conditions - exact match to Pine Script
+    #     prev_close = np.roll(close, 1)
+    #     prev_close[0] = close[0]  # Handle first bar
+        
+    #     long_cond = ((close > filter_line) & (close > prev_close) & (upward > 0)) | \
+    #                ((close > filter_line) & (close < prev_close) & (upward > 0))
+        
+    #     short_cond = ((close < filter_line) & (close < prev_close) & (downward > 0)) | \
+    #                 ((close < filter_line) & (close > prev_close) & (downward > 0))
+        
+    #     # CondIni logic - matches Pine Script exactly
+    #     cond_ini = np.zeros_like(close)
+    #     cond_ini_value = 0  # Persistent variable
+        
+    #     for i in range(len(close)):
+    #         if long_cond[i]:
+    #             cond_ini_value = 1
+    #         elif short_cond[i]:
+    #             cond_ini_value = -1
+    #         # else cond_ini_value remains unchanged
+    #         cond_ini[i] = cond_ini_value
+        
+    #     # Generate buy/sell signals - exact Pine Script logic
+    #     prev_cond_ini = np.roll(cond_ini, 1)
+    #     prev_cond_ini[0] = 0  # Handle first bar
+        
+    #     buy_signals = long_cond & (prev_cond_ini == -1)
+    #     sell_signals = short_cond & (prev_cond_ini == 1)
+        
+    #     return buy_signals, sell_signals, fdir
+    
+    # def run_filter(self,
+    #            df: pd.DataFrame,
+    #            filter_type: str = "Type 1",
+    #            movement_source: str = "Close",
+    #            range_quantity: float = 2.618,
+    #            range_scale: str = "Average Change",
+    #            range_period: int = 14,
+    #            smooth_range: bool = True,
+    #            smooth_period: int = 27,
+    #            average_filter: bool = True,
+    #            average_samples: int = 2,
+    #            point_value: float = 1.0,
+    #            tick_size: float = 0.01) -> pd.DataFrame:
+    #     """
+    #     Main function to run the Range Filter on OHLC data
+    #     Corrected to match Pine Script behavior exactly
+        
+    #     Parameters:
+    #     -----------
+    #     df : pd.DataFrame
+    #         DataFrame with OHLC data (columns: 'Open', 'High', 'Low', 'Close')
+    #     filter_type : str
+    #         "Type 1" or "Type 2"
+    #     movement_source : str
+    #         "Close" or "Wicks"
+    #     range_quantity : float
+    #         Range size multiplier
+    #     range_scale : str
+    #         Scale type for range calculation
+    #     range_period : int
+    #         Period for range calculations
+    #     smooth_range : bool
+    #         Whether to smooth the range
+    #     smooth_period : int
+    #         Period for range smoothing
+    #     average_filter : bool
+    #         Whether to average filter changes
+    #     average_samples : int
+    #         Number of changes to average
+    #     point_value : float
+    #         Point value for Points scale
+    #     tick_size : float
+    #         Tick size for Ticks scale
+            
+    #     Returns:
+    #     --------
+    #     pd.DataFrame
+    #         Original DataFrame with added Range Filter columns
+    #     """
+        
+    #     # Validate input DataFrame
+    #     required_cols = ['Open', 'High', 'Low', 'Close']
+    #     if not all(col in df.columns for col in required_cols):
+    #         raise ValueError(f"DataFrame must contain columns: {required_cols}")
+        
+    #     # Create a copy to avoid modifying original
+    #     result_df = df.copy()
+        
+    #     # Extract OHLC data
+    #     high = df['High'].values.astype(float)
+    #     low = df['Low'].values.astype(float)
+    #     close = df['Close'].values.astype(float)
+        
+    #     # Determine high/low values based on movement source
+    #     if movement_source == "Wicks":
+    #         h_val = high.copy()
+    #         l_val = low.copy()
+    #     else:  # Close
+    #         h_val = close.copy()
+    #         l_val = close.copy()
+        
+    #     # Calculate average price for range calculation - (h_val + l_val)/2
+    #     avg_price = (h_val + l_val) / 2
+        
+    #     # Calculate range size using the average price
+    #     range_size = self.calculate_range_size(
+    #         avg_price, high, low, close, range_scale, 
+    #         range_quantity, range_period, point_value, tick_size
+    #     )
+        
+    #     # Smooth the range if requested
+    #     if smooth_range:
+    #         condition = np.ones_like(range_size, dtype=bool)
+    #         r = self.conditional_ema(range_size, condition, smooth_period)
+    #     else:
+    #         r = range_size.copy()
+        
+    #     # Initialize the filter - using h_val and l_val as per Pine Script
+    #     rfilt = np.full(len(h_val), np.nan, dtype=float)
+    #     rfilt[0] = (h_val[0] + l_val[0]) / 2
+        
+    #     # Calculate filter values iteratively
+    #     for i in range(1, len(h_val)):
+    #         rfilt[i] = rfilt[i-1]  # Default: keep previous value
+            
+    #         if filter_type == "Type 1":
+    #             # Type 1: Direct comparison with range threshold
+    #             if h_val[i] - r[i] > rfilt[i-1]:
+    #                 rfilt[i] = h_val[i] - r[i]
+    #             elif l_val[i] + r[i] < rfilt[i-1]:
+    #                 rfilt[i] = l_val[i] + r[i]
+                    
+    #         elif filter_type == "Type 2":
+    #             # Type 2: Step-based movement
+    #             if h_val[i] >= rfilt[i-1] + r[i]:
+    #                 steps = np.floor(np.abs(h_val[i] - rfilt[i-1]) / r[i])
+    #                 rfilt[i] = rfilt[i-1] + steps * r[i]
+    #             elif l_val[i] <= rfilt[i-1] - r[i]:
+    #                 steps = np.floor(np.abs(l_val[i] - rfilt[i-1]) / r[i])
+    #                 rfilt[i] = rfilt[i-1] - steps * r[i]
+        
+    #     # Calculate initial bands
+    #     hi_band1 = rfilt + r
+    #     lo_band1 = rfilt - r
+        
+    #     # Apply conditional averaging if requested
+    #     if average_filter:
+    #         # Detect filter changes
+    #         filter_changes = np.zeros(len(rfilt), dtype=bool)
+    #         filter_changes[0] = True  # First value is always considered a "change"
+    #         filter_changes[1:] = rfilt[1:] != rfilt[:-1]
+            
+    #         # Apply conditional EMA only when filter changes
+    #         rfilt_final = self.conditional_ema(rfilt, filter_changes, average_samples)
+    #         hi_band_final = self.conditional_ema(hi_band1, filter_changes, average_samples)
+    #         lo_band_final = self.conditional_ema(lo_band1, filter_changes, average_samples)
+    #     else:
+    #         rfilt_final = rfilt
+    #         hi_band_final = hi_band1
+    #         lo_band_final = lo_band1
+        
+    #     # Calculate signals using the close price
+    #     buy_signals, sell_signals, trend_direction = self.calculate_signals(close, rfilt_final)
+        
+    #     # Add results to DataFrame
+    #     result_df['RF_UpperBand'] = hi_band_final
+    #     result_df['RF_LowerBand'] = lo_band_final
+    #     result_df['RF_Filter'] = rfilt_final
+    #     result_df['RF_Trend'] = trend_direction
+    #     result_df['RF_BuySignal'] = buy_signals.astype(int)
+    #     result_df['RF_SellSignal'] = sell_signals.astype(int)
+        
+    #     # Store results for potential plotting
+    #     self.results = {
+    #         'df': result_df,
+    #         'filter_line': rfilt_final,
+    #         'upper_band': hi_band_final,
+    #         'lower_band': lo_band_final,
+    #         'buy_signals': buy_signals,
+    #         'sell_signals': sell_signals,
+    #         'trend_direction': trend_direction
+    #     }
+        
+    #     return result_df
+    
+    # def run_filter(self,
+    #                df: pd.DataFrame,
+    #                filter_type: str = "Type 1",
+    #                movement_source: str = "Close",
+    #                range_quantity: float = 2.618,
+    #                range_scale: str = "Average Change",
+    #                range_period: int = 14,
+    #                smooth_range: bool = True,
+    #                smooth_period: int = 27,
+    #                average_filter: bool = True,
+    #                average_samples: int = 2,
+    #                point_value: float = 1.0,
+    #                tick_size: float = 0.01) -> pd.DataFrame:
+    #     """
+    #     Main function to run the Range Filter on OHLC data
+        
+    #     Parameters:
+    #     -----------
+    #     df : pd.DataFrame
+    #         DataFrame with OHLC data (columns: 'Open', 'High', 'Low', 'Close')
+    #     filter_type : str
+    #         "Type 1" or "Type 2"
+    #     movement_source : str
+    #         "Close" or "Wicks"
+    #     range_quantity : float
+    #         Range size multiplier
+    #     range_scale : str
+    #         Scale type for range calculation ("Points", "Pips", "Ticks", "% of Price", 
+    #         "ATR", "Average Change", "Standard Deviation", "Absolute")
+    #     range_period : int
+    #         Period for range calculations
+    #     smooth_range : bool
+    #         Whether to smooth the range
+    #     smooth_period : int
+    #         Period for range smoothing
+    #     average_filter : bool
+    #         Whether to average filter changes
+    #     average_samples : int
+    #         Number of changes to average
+    #     point_value : float
+    #         Point value for Points scale
+    #     tick_size : float
+    #         Tick size for Ticks scale
+            
+    #     Returns:
+    #     --------
+    #     pd.DataFrame
+    #         Original DataFrame with added Range Filter columns
+    #     """
+        
+    #     # Validate input DataFrame
+    #     required_cols = ['Open', 'High', 'Low', 'Close']
+    #     if not all(col in df.columns for col in required_cols):
+    #         raise ValueError(f"DataFrame must contain columns: {required_cols}")
+        
+    #     # Create a copy to avoid modifying original
+    #     result_df = df.copy()
+        
+    #     # Extract OHLC data
+    #     high = df['High'].values
+    #     low = df['Low'].values
+    #     close = df['Close'].values
+        
+    #     # Determine high/low values based on movement source
+    #     if movement_source == "Wicks":
+    #         h_val = high
+    #         l_val = low
+    #     else:  # Close
+    #         h_val = close
+    #         l_val = close
+        
+    #     # Calculate average price for range calculation
+    #     avg_price = (h_val + l_val) / 2
+        
+    #     # Calculate range size
+    #     range_size = self.calculate_range_size(
+    #         avg_price, high, low, close, range_scale, 
+    #         range_quantity, range_period, point_value, tick_size
+    #     )
+        
+    #     # Calculate Range Filter
+    #     hi_band, lo_band, filter_line = self.range_filter(
+    #         h_val, l_val, range_size, range_period, filter_type,
+    #         smooth_range, smooth_period, average_filter, average_samples
+    #     )
+        
+    #     # Calculate signals
+    #     buy_signals, sell_signals, trend_direction = self.calculate_signals(close, filter_line)
+        
+    #     # Add results to DataFrame
+    #     result_df['RF_UpperBand'] = hi_band
+    #     result_df['RF_LowerBand'] = lo_band
+    #     result_df['RF_Filter'] = filter_line
+    #     result_df['RF_Trend'] = trend_direction
+    #     result_df['RF_BuySignal'] = buy_signals.astype(int)
+    #     result_df['RF_SellSignal'] = sell_signals.astype(int)
+        
+    #     # Store results for potential plotting
+    #     self.results = {
+    #         'df': result_df,
+    #         'filter_line': filter_line,
+    #         'upper_band': hi_band,
+    #         'lower_band': lo_band,
+    #         'buy_signals': buy_signals,
+    #         'sell_signals': sell_signals,
+    #         'trend_direction': trend_direction
+    #     }
+        
+    #     return result_df
 
 # Example usage:
 """

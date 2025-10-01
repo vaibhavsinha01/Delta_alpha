@@ -492,13 +492,16 @@ class DeltaBroker:
             return 60  # Default to 1 minute
     
     def fetch_data_binance(self):
-        from binance_client_ import BinanceClient
-        binance_client = BinanceClient(api_key=BINANCE_API_KEY,api_secret_key=BINANCE_API_SECRET,testnet=0)
+        # from binance_client_ import BinanceClient
+        from bybit_client import BybitClient
+        # binance_client = BinanceClient(api_key=BINANCE_API_KEY,api_secret_key=BINANCE_API_SECRET,testnet=0)
+        binance_client = BybitClient()
         limit = 1000
         interval_seconds = delta_client.interval_to_seconds(DELTA_INTERVAL)
         end_time = int(time.time() * 1000)
         start_time = end_time - (interval_seconds * 1000 * limit)
-        self.df = binance_client.get_klines(symbol=BINANCE_SYMBOL,interval=BINANCE_INTERVAL,limit=100)
+        # self.df = binance_client.get_klines(symbol=BINANCE_SYMBOL,interval=BINANCE_INTERVAL,limit=199)
+        self.df = binance_client.get_klines(symbol="ETHUSD",category="inverse",interval="15",limit=200)
         self.df['Timestamp'] = pd.to_datetime(self.df['time'],unit='ms')
         self.df.sort_values(by='Timestamp',ascending=False,inplace=True)
         self.df = self.df.iloc[::-1].reset_index(drop=True)
@@ -623,26 +626,6 @@ class MartingaleManager:
             print("Position cleared: h_pos = 0")
         except Exception as e:
             print(f"Error clearing position: {e}")
-    
-    # def update_trade_result(self, result):
-    #     """Update trade result and adjust system based on RM1"""
-    #     try:
-    #         self.last_trade_result = result
-            
-    #         if result == 'win':
-    #             self.current_level = 0
-    #             print(f"Trade won! Resetting to level 0, leverage: {self.get_leverage()}x")
-                    
-    #         elif result == 'loss':
-    #             if self.current_level >= self.max_levels - 1:
-    #                 print(f"5th trade failed! Resetting to beginning (level 0)")
-    #                 self.current_level = 0
-    #             else:
-    #                 self.current_level += 1
-    #                 print(f"Trade lost! Moving to level {self.current_level}, leverage: {self.get_leverage()}x")
-    #         logger.info(f"the current leverage level is {self.current_level}")
-    #     except Exception as e:
-    #         print(f"Error updating trade result: {e}")
 
     def update_trade_result(self, result, is_fake_trigger=False):
         """Update trade result and adjust system based on RM1 with double-trigger prevention"""
@@ -778,81 +761,6 @@ class MartingaleManager:
             print(f"Error checking opposite signal: {e}")
             return False
 
-    # this is a function used to close when an opposite signal occurs 
-    # def check_opposite_signal(self):
-    #     """Check for opposite signal and close if detected"""
-    #     try:
-    #         # Get fresh data
-    #         df = delta_client.fetch_data_binance()
-    #         df = calculate_signals(df)
-            
-    #         latest_candle = df.iloc[-1]
-    #         current_signal = int(latest_candle['Signal_Final'])     
-            
-    #         if self.entry_signal is None:
-    #             # logger.info("No entry signal recorded")
-    #             return False
-
-    #         if current_signal == 0:
-    #             return False  # Zero signal is not an opposite signal
-
-    #         # Check for true opposite signals (different signs, both non-zero)
-    #         if self.h_pos != 0:
-    #             if (self.entry_signal == 2 and current_signal == -2) or \
-    #             (self.entry_signal == -2 and current_signal == 2):    
-                
-    #                 logger.info(f"Opposite signal detected! Entry: {self.entry_signal}, Current: {current_signal}")
-                    
-    #                 # Get balance before closing
-    #                 # balance_before = float(delta_client.get_usd_balance())
-    #                 balance_before = martingale_manager.balance_before
-                    
-    #                 # Close position
-    #                 opposite_side = "sell" if self.last_direction == "buy" else "buy"
-    #                 logger.info(f"the closing order is being placed , the opposite direction is {opposite_side} since the last direction was {self.last_direction}")
-    #                 res = delta_client.place_order_market(side=str(opposite_side), size=int(self.last_quantity))
-    #                 self.h_pos = 0
-    #                 reset_trade_tracking()
-
-    #                 set_candle_exit_time(time=self.df.iloc[-1]['time'])
-    #                 logger.info(f"since an opposite signal is detected now we have placed an order with response {res} , now the position status of self.h_pos is {self.h_pos}")
-    #                 reset_candle_entry_exit_time() # no need for a sleep function here
-    #                 martingale_manager.clear_position()
-                    
-    #                 # if res:
-                        
-    #                 balance_after = float(delta_client.get_usd_balance())
-    #                 loss_amount = balance_before - balance_after
-    #                 logger.info(f"opposite signal loss amount is {loss_amount}")
-                        
-    #                 # Add to global fake_loss_amount
-    #                 global fake_loss_amount
-
-    #                 if loss_amount > 0:  # Only add actual losses
-    #                         fake_loss_amount += loss_amount
-    #                         print(f"Loss from opposite signal: ${loss_amount:.2f}")
-    #                         print(f"Total fake loss: ${fake_loss_amount:.2f}")
-                            
-    #                         # Check if fake loss limit reached
-    #                         if fake_loss_amount >= fake_loss_amount_maxlimit:
-    #                             if self.current_level < self.max_levels - 1:
-    #                                 self.current_level += 1
-    #                             else:
-    #                                 self.current_level = 0
-    #                             fake_loss_amount = 0
-                        
-    #                 logger.info(f"a balance amount of {loss_amount:.2f} is incremented to the fake trade loss , the balance before was {balance_before} and the balance after is {balance_after} the total balance till now is {fake_loss_amount:.2f} and max limit is {fake_loss_amount_maxlimit} and the current level is {self.current_level}")
-                        
-    #                 self.clear_position()
-    #                 # time.sleep(2)
-    #                 return True
-                
-    #             return False
-            
-    #     except Exception as e:
-    #         print(f"Error checking opposite signal: {e}")
-    #         return False
-
     def monitor_and_close_position(self):
         global double_trigger_flag,pending_double_trigger
         try:
@@ -914,67 +822,7 @@ class MartingaleManager:
         except Exception as e:
             print(f"❌ Error in monitor_and_close_position: {e}")
             return False
-
-    # def monitor_and_close_position(self):
-    #     try:
-    #         if self.h_pos == 0:
-    #             return False
-
-    #         print(f"  Checking position status...")
-    #         print(f"  Direction: {self.last_direction}")
-    #         print(f"  Entry: ${self.last_entry_price}")
-    #         print(f"  SL: ${self.last_sl_price}")
-    #         print(f"  TP: ${self.last_tp_price}")
-    #         print(f"  Quantity: {self.last_quantity}")
-
-    #         try:
-    #             # Fetch updated order status
-    #             tp_res = delta_client.get_order_status(order_id=bracket_tp_order_id)
-    #             current_bracket_state_tp = tp_res['result']['state']
-
-    #             sl_res = delta_client.get_order_status(order_id=bracket_sl_order_id)
-    #             current_bracket_state_sl = sl_res['result']['state']
-
-    #             # Check if either TP or SL is closed
-    #             if current_bracket_state_tp == "closed" or current_bracket_state_sl == "closed":
-    #                 print(f"✅ Order closed. TP state: {current_bracket_state_tp}, SL state: {current_bracket_state_sl}")
-
-    #                 if current_bracket_state_tp == "closed":
-    #                     logger.info(f"we have won the trade")
-    #                     self.update_trade_result('win')
-    #                     logger.info(f"current martingale level is {martingale_manager.current_level} and the current fake loss is {fake_loss_amount}")
-    #                 elif current_bracket_state_sl == "closed":
-    #                     logger.info(f"we have lost the trade")
-    #                     logger.info(f"current martingale level is {martingale_manager.current_level} and the current fake loss is {fake_loss_amount}")
-    #                     self.update_trade_result('loss')
-
-    #                 self.clear_position()
-    #                 set_candle_exit_time(self.df.iloc[-1]['time'])
-
-    #                 # print("🛌 Sleeping for 900 seconds to avoid re-entry in same candle...")
-    #                 if check_entry_exit_same_candle_condition():
-    #                     logger.info(f"here we are going to sleep for {RENTRY_TIME_BINANCE} since the entry and exit time is the same")
-    #                     time.sleep(RENTRY_TIME_BINANCE)
-    #                 else:
-    #                     logger.info(f"here we are not going to sleep since the entry and exit time is not same")
-    #                     time.sleep(0.5)
-    #                 reset_candle_entry_exit_time()
-    #                 print(" Ready for next trade opportunity")
-    #                 return True
-
-    #             # Still open
-    #             print(f" Order still open... TP state: {current_bracket_state_tp}, SL state: {current_bracket_state_sl}")
-    #             return False
-
-    #         except Exception as e:
-    #             print(f"Error checking order status: {e}")
-    #             return False
-
-    #     except Exception as e:
-    #         print(f"❌ Error in monitor_and_close_position: {e}")
-    #         return False
-
-# Initialize components
+        
 try:
     rf = RangeFilter()
     bsrsi = RSIBuySellIndicator()
@@ -1125,96 +973,6 @@ def fake_trade_loss_checker(df, current_time):
         print(f"⚠️ Error in fake_trade_loss_checker: {e}")
         return False
 
-# def fake_trade_loss_checker(df, current_time):
-#     global fake_loss_amount, trade_taken_time, trade_taken_signal, trade_taken_price, trade_taken_direction
-
-#     try:
-#         start_balance = float(delta_client.get_usd_balance())
-
-#         if martingale_manager.h_pos != 0:
-#             print("📊 Monitoring for potential fake signal...")
-
-#             while True:
-#                 # df = delta_client.fetch_data_binance()  # get real-time data from Binance
-#                 # df = delta_client.fetch_data()
-#                 df = delta_client.fetch_data_binance()
-#                 df = calculate_signals(df)
-#                 df.to_csv('Delta_Final.csv')
-
-#                 last_row = df.iloc[-1]
-#                 last_time = int(last_row['time'])
-
-#                 print(f"Last DF time: {last_time}, Current candle time: {current_time}")
-
-#                 if last_time >= current_time + 30:
-#                     print("✅ New candle detected, now evaluating signal reversal...")
-
-#                     second_last_candle = df.iloc[-2]
-#                     second_last_signal = second_last_candle['Signal_Final']
-#                     second_last_signal_time = second_last_candle['Timestamp']
-#                     last_candle = df.iloc[-1]
-#                     last_signal = last_candle['Signal_Final']
-#                     print(f"Second last signal: {second_last_signal}")
-
-#                     if second_last_signal == 0:
-#                         print("🚨 FAKE SIGNAL DETECTED!")
-#                         print(f"  Trade taken at: {trade_taken_time}")
-#                         print(f"  Original signal: {trade_taken_signal}")
-#                         logger.info(f"fake signal is detected trade taken at {trade_taken_time} with original signal {trade_taken_signal} and the second last signal time is {second_last_signal_time}")
-#                         logger.info(f"last signal is {last_signal} , second last signal is {second_last_signal}")
-
-#                         # Close the position
-#                         close_position_on_fake_signal()
-
-#                         # Calculate and log the fake loss
-#                         current_balance = float(delta_client.get_usd_balance())
-#                         fake_loss = start_balance - current_balance
-#                         fake_loss_amount += fake_loss
-
-#                         print(f"  Calculated fake loss: ${fake_loss:.2f}")
-#                         print(f"  Total fake loss amount: ${fake_loss_amount:.2f}")
-#                         logger.info(f"Fake Loss amount is ${fake_loss_amount}") # code added
-#                         print(f"  Max limit: ${fake_loss_amount_maxlimit}")
-
-#                         # Adjust martingale if needed
-#                         if fake_loss_amount >= fake_loss_amount_maxlimit:
-#                             print("🔥 FAKE LOSS LIMIT REACHED!")
-#                             if martingale_manager.current_level < martingale_manager.max_levels - 1:
-#                                 martingale_manager.current_level += 1
-#                                 print(f"  Increasing martingale level to {martingale_manager.current_level}")
-#                             else:
-#                                 print("  Max martingale level reached. Resetting to 0.")
-#                                 martingale_manager.current_level = 0
-
-#                             fake_loss_amount = 0  # Reset fake loss tracking
-#                             print(f"  New leverage: {martingale_manager.get_leverage()}x")
-
-#                         # Reset trade tracking
-#                         reset_trade_tracking()
-#                         logger.info(f"the current martingale level is {martingale_manager.current_level}")
-#                         import time
-#                         # print(f"sleeping for 900 seconds to prevent re-entry")
-#                         if check_entry_exit_same_candle_condition():
-#                             logger.info(f"here we are going to sleep for {RENTRY_TIME_BINANCE} since the entry and exit time is the same")
-#                             time.sleep(RENTRY_TIME_BINANCE)
-#                         else:
-#                             logger.info(f"here we are not going to sleep since the entry and exit time is not same")
-#                             time.sleep(0.5)
-#                         reset_candle_entry_exit_time()
-#                         return True
-#                     else:
-#                         print("✅ Signal is still valid. No fake trade.")
-#                         return False
-#                 else:
-#                     print("🕒 Waiting for new candle... Sleeping 2 seconds.")
-#                     import time
-#                     time.sleep(2) # important 
-                
-
-#     except Exception as e:
-#         print(f"⚠️ Error in fake_trade_loss_checker: {e}")
-#         return False
-
 def close_position_on_fake_signal():
     global double_trigger_flag,pending_double_trigger
     """Close position by placing opposite order of same size"""
@@ -1364,23 +1122,25 @@ def calculate_signals(df):
     try:
         from module.rf import RangeFilter
         from module.ib_indicator import calculate_inside_ib_box
-        from module.rsi_gaizy import RSIGainzy
         from module.rsi_buy_sell import RSIBuySellIndicator
         rf = RangeFilter()
         bsrsi = RSIBuySellIndicator()
-        Grsi = RSIGainzy()
+        
         df.rename(columns={'close':'Close','open':'Open','high':'High','low':'Low','volume':'Volume'},inplace=True)
-        if MASTER_HEIKEN_CHOICE==1:
+        if int(MASTER_HEIKEN_CHOICE)==1:
             calculate_heiken_ashi(df)
+        # df = rf.run_filter(df)
         df = rf.run_filter(df)
-        # df['gaizy_color'] = self.Grsi.calculate_signals(df=df)
         df.rename(columns={'Close':'close','Open':'open','High':'high','Low':'low','Volume':'volume'},inplace=True)
         df['rsi'],df['rsi_buy'],df['rsi_sell'] = bsrsi.generate_signals(df['close'])
-        df['gaizy_color'] = Grsi.calculate_gainzy_colors(df=df)
-        # df,_ = calculate_inside_bar_boxes(df)
         df = calculate_inside_ib_box(df)
+        
+        # columns_to_drop = [
+        #     'RF_UpperBand', 'RF_LowerBand', 'RF_Filter', 'RF_Trend',
+        #     'IsIB', 'BoxHigh', 'BoxLow', 'BarColor','rsi'
+        # ]
         columns_to_drop = [
-            'RF_UpperBand', 'RF_LowerBand', 'RF_Filter', 'RF_Trend',
+            'RF_UpperBand', 'RF_LowerBand','RF_Trend',
             'IsIB', 'BoxHigh', 'BoxLow', 'BarColor','rsi'
         ]
         df = df.drop(columns=columns_to_drop)
@@ -1388,29 +1148,26 @@ def calculate_signals(df):
         df = df.tail(200)
         df['Signal_Final'] = 0
 
+        # Configuration variable for RF signal lookback period
+        N_CANDLE_LOOKBACK = 5
+
         # Initialize signal tracking variables
         last_rf_buy_signal = False
         last_rf_sell_signal = False
         rf_signal_candle = -1
         rf_used = False
 
-        # Initialize Arrow signal tracking variables (added from second code)
+        # Initialize IB Arrow signal tracking variables
         last_green_arrow = False
         last_red_arrow = False
         arrow_signal_candle = -1
         arrow_used = False
 
-        pending_rsi_buy = False
-        pending_rsi_sell = False
+        # Initialize RSI signal tracking variables
+        last_rsi_buy_signal = False
+        last_rsi_sell_signal = False
         rsi_signal_candle = -1
-
-        # Track used RSI_Gaizy lines to ensure only one trade per color line
-        used_gaizy_green = False
-        used_gaizy_red = False
-        used_gaizy_pink = False
-        used_gaizy_black = False  # Added this line
-        used_gaizy_dark_green = False
-        used_gaizy_blue = False
+        rsi_used = False
 
         for i in range(len(df)):
             row = df.iloc[i]
@@ -1423,9 +1180,13 @@ def calculate_signals(df):
             new_rf_buy = current_rf_buy and (prev_row is None or prev_row['RF_BuySignal'] != 1)
             new_rf_sell = current_rf_sell and (prev_row is None or prev_row['RF_SellSignal'] != 1)
 
-            # Detect new Arrow signals (added from second code)
+            # Detect new IB Arrow signals
             new_green_arrow = row['GreenArrow'] == 1 and (prev_row is None or prev_row['GreenArrow'] != 1)
             new_red_arrow = row['RedArrow'] == 1 and (prev_row is None or prev_row['RedArrow'] != 1)
+
+            # Detect new RSI signals
+            new_rsi_buy = row['rsi_buy'] == 1 and (prev_row is None or prev_row['rsi_buy'] != 1)
+            new_rsi_sell = row['rsi_sell'] == 1 and (prev_row is None or prev_row['rsi_sell'] != 1)
 
             # Update RF signal tracking
             if new_rf_buy:
@@ -1439,7 +1200,7 @@ def calculate_signals(df):
                 rf_signal_candle = i
                 rf_used = False
 
-            # Update Arrow signal tracking (added from second code)
+            # Update IB Arrow signal tracking
             if new_green_arrow:
                 last_green_arrow = True
                 last_red_arrow = False
@@ -1451,157 +1212,110 @@ def calculate_signals(df):
                 arrow_signal_candle = i
                 arrow_used = False
 
-            # Reset RF signals if they're older than 1 candle and not used
-            if (i - rf_signal_candle) > 1 and (last_rf_buy_signal or last_rf_sell_signal):
+            # Update RSI signal tracking
+            if new_rsi_buy:
+                last_rsi_buy_signal = True
+                last_rsi_sell_signal = False
+                rsi_signal_candle = i
+                rsi_used = False
+            elif new_rsi_sell:
+                last_rsi_sell_signal = True
+                last_rsi_buy_signal = False
+                rsi_signal_candle = i
+                rsi_used = False
+
+            # Reset signals if they're older than specified timeframes and not used
+            # RF signals valid for N_CANDLE_LOOKBACK candles until IB trigger
+            if (i - rf_signal_candle) > N_CANDLE_LOOKBACK and (last_rf_buy_signal or last_rf_sell_signal) and not rf_used:
                 last_rf_buy_signal = False
                 last_rf_sell_signal = False
                 rf_used = False
 
-            # Reset Arrow signals if they're older than 1 candle and not used
-            if (i - arrow_signal_candle) > 1 and (last_green_arrow or last_red_arrow):
+            # IB Arrow signals valid for 1 candle for RF confirmation
+            if (i - arrow_signal_candle) > 1 and (last_green_arrow or last_red_arrow) and not arrow_used:
                 last_green_arrow = False
                 last_red_arrow = False
                 arrow_used = False
 
-            # Detect RSI_Gaizy color changes
-            current_gaizy = row['gaizy_color']
-            gaizy_changed = prev_row is not None and prev_row['gaizy_color'] != current_gaizy
+            # RSI signals valid for 1 candle for IB confirmation
+            if (i - rsi_signal_candle) > 1 and (last_rsi_buy_signal or last_rsi_sell_signal) and not rsi_used:
+                last_rsi_buy_signal = False
+                last_rsi_sell_signal = False
+                rsi_used = False
 
-            # Reset color usage flags when new color appears
-            if gaizy_changed:
-                if current_gaizy in ['light_green']:
-                    used_gaizy_green = False
-                elif current_gaizy in ['green']:
-                    used_gaizy_dark_green = False
-                elif current_gaizy in ['red']:
-                    used_gaizy_red = False
-                elif current_gaizy in ['pink']:
-                    used_gaizy_pink = False
-                elif current_gaizy == 'black':  # Added this condition
-                    used_gaizy_black = False
-                elif current_gaizy == "blue":
-                    used_gaizy_blue = False
+            signal = 0
 
-            signal = 0  
-
-            if new_rf_buy and row['GreenArrow'] == 1 and not rf_used:
-                signal = 2  # RF + IB_Box buy signal
+            # CONDITION 4: IB and RF in same candle (Highest Priority)
+            if new_rf_buy and new_green_arrow and not rf_used and not arrow_used:
+                signal = 2  # RF + IB_Box buy signal (same candle)
                 rf_used = True
+                arrow_used = True
                 last_rf_buy_signal = False
+                last_green_arrow = False
                 # print(f"RF + IB_Box BUY signal triggered at candle {i} (same candle)")
-            elif new_rf_sell and row['RedArrow'] == 1 and not rf_used:
-                signal = -2  # RF + IB_Box sell signal
+            elif new_rf_sell and new_red_arrow and not rf_used and not arrow_used:
+                signal = -2  # RF + IB_Box sell signal (same candle)
                 rf_used = True
+                arrow_used = True
                 last_rf_sell_signal = False
+                last_red_arrow = False
                 # print(f"RF + IB_Box SELL signal triggered at candle {i} (same candle)")
             
-            # Condition A2: RF signal, then Arrow signal in immediate next candle
-            elif last_rf_buy_signal and not rf_used and row['GreenArrow'] == 1 and (i - rf_signal_candle) == 1:
+            # CONDITION 1: RF signal first, then IB box after few candles
+            elif last_rf_buy_signal and not rf_used and new_green_arrow:
                 signal = 2  # RF + IB_Box buy signal
                 rf_used = True
+                arrow_used = True
                 last_rf_buy_signal = False
-                # print(f"RF + IB_Box BUY signal triggered at candle {i} (RF at {rf_signal_candle}, Arrow at {i})")
-            elif last_rf_sell_signal and not rf_used and row['RedArrow'] == 1 and (i - rf_signal_candle) == 1:
+                last_green_arrow = False
+                # print(f"RF + IB_Box BUY signal triggered at candle {i} (RF at {rf_signal_candle}, IB at {i})")
+            elif last_rf_sell_signal and not rf_used and new_red_arrow:
                 signal = -2  # RF + IB_Box sell signal
                 rf_used = True
+                arrow_used = True
                 last_rf_sell_signal = False
+                last_red_arrow = False
+                # print(f"RF + IB_Box SELL signal triggered at candle {i} (RF at {rf_signal_candle}, IB at {i})")
 
+            # CONDITION 2: IB box first, then RF signal on immediate next candle
             elif last_green_arrow and not arrow_used and new_rf_buy and (i - arrow_signal_candle) == 1:
                 signal = 2  # RF + IB_Box buy signal
                 arrow_used = True
+                rf_used = True
                 last_green_arrow = False
-                # print(f"RF + IB_Box BUY signal triggered at candle {i} (Arrow at {arrow_signal_candle}, RF at {i})")
+                last_rf_buy_signal = False
+                # print(f"RF + IB_Box BUY signal triggered at candle {i} (IB at {arrow_signal_candle}, RF at {i})")
             elif last_red_arrow and not arrow_used and new_rf_sell and (i - arrow_signal_candle) == 1:
                 signal = -2  # RF + IB_Box sell signal
                 arrow_used = True
+                rf_used = True
                 last_red_arrow = False
+                last_rf_sell_signal = False
+                # print(f"RF + IB_Box SELL signal triggered at candle {i} (IB at {arrow_signal_candle}, RF at {i})")
 
-            elif signal == 0:
-                # Each RSI_Gaizy color line can trigger only one trade
-                if current_gaizy in ['light_green'] and not used_gaizy_green:
-                    # Green line → Triggers Green Box trade only
-                    if row['GreenArrow'] == 1:
-                        signal = 1
-                        used_gaizy_green = True
-                        # print(f"RSI_Gaizy GREEN + IB_Box signal triggered at candle {i}")
-                elif current_gaizy in ['green'] and not used_gaizy_dark_green:
-                    if row['GreenArrow'] == 1:
-                        signal = 1 
-                        used_gaizy_dark_green = True
-                        # print(f"RSI_Gaizy GREEN + IB_box triggered at candle {i}")
-                elif current_gaizy == 'red' and not used_gaizy_red:
-                    # Red line → Triggers Red Box trade only
-                    if row['RedArrow'] == 1:
-                        signal = -1
-                        used_gaizy_red = True
-                        # print(f"RSI_Gaizy RED + IB_Box signal triggered at candle {i}")
-                elif current_gaizy == 'pink' and not used_gaizy_pink:
-                    # Pink strong sell → Triggers Red Box trade only
-                    if row['RedArrow'] == 1:
-                        signal = -1
-                        used_gaizy_pink = True
-                        # print(f"RSI_Gaizy PINK + IB_Box signal triggered at candle {i}")
-                elif current_gaizy == 'black' and not used_gaizy_black:  # Added usage check
-                    # Black signal → Take trade based on IB box
-                    if row['GreenArrow'] == 1:
-                        signal = 1
-                        used_gaizy_black = True  # Mark as used
-                        # print(f"RSI_Gaizy BLACK + Green IB_Box signal triggered at candle {i}")
-                    elif row['RedArrow'] == 1:
-                        signal = -1
-                        used_gaizy_black = True  # Mark as used
-                        # print(f"RSI_Gaizy BLACK + Red IB_Box signal triggered at candle {i}")
-                elif current_gaizy == 'blue' and not used_gaizy_blue:
-                    if row['GreenArrow'] == 1:
-                        signal = 1
-                        used_gaizy_blue = True
-                    elif row['RedArrow'] == 1:
-                        signal = 1
-                        used_gaizy_blue = True
+            # CONDITION 5: RSI and IB in same candle
+            elif signal == 0 and new_rsi_buy and new_green_arrow and not rsi_used:
+                signal = 4  # RSI + IB_Box buy signal (same candle)
+                rsi_used = True
+                last_rsi_buy_signal = False
+                # print(f"RSI + IB_Box BUY signal triggered at candle {i} (same candle)")
+            elif signal == 0 and new_rsi_sell and new_red_arrow and not rsi_used:
+                signal = -4  # RSI + IB_Box sell signal (same candle)
+                rsi_used = True
+                last_rsi_sell_signal = False
+                # print(f"RSI + IB_Box SELL signal triggered at candle {i} (same candle)")
 
-            # Mark RSI_Gaizy colors as used when ANY signal is triggered (including RF + IB_Box)
-            if signal != 0:
-                if current_gaizy in ['light_green']:
-                    used_gaizy_green = True
-                elif current_gaizy == 'red':
-                    used_gaizy_red = True
-                elif current_gaizy == 'pink':
-                    used_gaizy_pink = True
-                elif current_gaizy == 'black':
-                    used_gaizy_black = True
-                elif current_gaizy in ['green']:
-                    used_gaizy_dark_green = True
-                elif current_gaizy == 'blue':
-                    used_gaizy_blue = True
-
-            if signal == 0:
-                # Track RSI signals
-                if row['rsi_buy'] == 1:
-                    pending_rsi_buy = True
-                    rsi_signal_candle = i
-                elif row['rsi_sell'] == 1:
-                    pending_rsi_sell = True
-                    rsi_signal_candle = i
-
-                # Check for RF confirmation after RSI signal
-                if pending_rsi_buy and current_rf_buy and (i - rsi_signal_candle) <= 1 and not rf_used:
-                    signal = 3
-                    pending_rsi_buy = False
-                    rf_used = True
-                    last_rf_buy_signal = False
-                    # print(f"RSI + RF BUY signal triggered at candle {i}")
-                elif pending_rsi_sell and current_rf_sell and (i - rsi_signal_candle) <= 1 and not rf_used:
-                    signal = -3
-                    pending_rsi_sell = False
-                    rf_used = True
-                    last_rf_sell_signal = False
-                    # print(f"RSI + RF SELL signal triggered at candle {i}")
-
-                # Reset pending RSI signals if too much time has passed (more than 2 candles)
-                if pending_rsi_buy and (i - rsi_signal_candle) > 2:
-                    pending_rsi_buy = False
-                if pending_rsi_sell and (i - rsi_signal_candle) > 2:
-                    pending_rsi_sell = False
+            # CONDITION 3: RSI signal first, then IB on immediate next candle
+            elif signal == 0 and last_rsi_buy_signal and not rsi_used and new_green_arrow and (i - rsi_signal_candle) == 1:
+                signal = 4  # RSI + IB_Box buy signal
+                rsi_used = True
+                last_rsi_buy_signal = False
+                # print(f"RSI + IB_Box BUY signal triggered at candle {i} (RSI at {rsi_signal_candle}, IB at {i})")
+            elif signal == 0 and last_rsi_sell_signal and not rsi_used and new_red_arrow and (i - rsi_signal_candle) == 1:
+                signal = -4  # RSI + IB_Box sell signal
+                rsi_used = True
+                last_rsi_sell_signal = False
+                # print(f"RSI + IB_Box SELL signal triggered at candle {i} (RSI at {rsi_signal_candle}, IB at {i})")
 
             # Assign the final signal
             df.iat[i, df.columns.get_loc('Signal_Final')] = signal
@@ -1611,298 +1325,6 @@ def calculate_signals(df):
         return df
     except Exception as e:
         print(f"Error occured in calculating the signal : {e}")
-
-# if __name__ == "__main__":
-#     try:
-#         print("🚀 Starting Delta Exchange Trading Bot with Bracket Orders")
-#         print(f"💰 Initial Capital: Rs{base_capital}")
-#         print(f"⚡ Base Leverage: {base_leverage}x")
-#         print(f"📊 Symbol: {DELTA_SYMBOL}")
-#         print(f"⏰ Interval: {DELTA_INTERVAL}")
-#         print(f"✅ TP PERCENT: {DELTA_TP_PERCENT}")
-#         print(f"❌ SL BUFFER POINTS: {DELTA_SL_BUFFER_POINTS}")
-#         # logger.info(f"Fake Loss amount is ${fake_loss_amount}")
-#         logger.info(f"The trading bot has started with initial capital {base_capital} and initial leverage {base_leverage} and symbol {DELTA_SYMBOL} and interval {DELTA_INTERVAL} with tp percent {DELTA_TP_PERCENT} and sl points {DELTA_SL_BUFFER_POINTS} current fake loss amount is {fake_loss_amount} and current martingale level is {martingale_manager.current_level}")
-#         print("=" * 50)
-        
-#         # Set initial leverage
-#         delta_client.set_leverage(base_leverage)
-        
-#     except Exception as e:
-#         print(f"Error in initial setup: {e}")
-#         exit(1)
-    
-#     while True:
-#         try:
-#             print("\n🔄 --- New Trading Cycle ---")
-#             # df_check = delta_client.fetch_data_binance() # HERE I AM FETCHING DATA FROM BINANCE BECAUSE THE DATA FROM DELTA EXCHANGE IS GIVING A LAG OF 1 MINUTE
-#             # df_check = delta_client.fetch_data()
-#             df_check = delta_client.fetch_data_binance()
-#             # the following lines below have been added
-
-#             # Validate fetched data
-#             if df_check is None or df_check.empty:
-#                 print("ERROR: No data fetched from Binance")
-#                 continue
-
-#             # print("Data types after fetch:")
-#             # print(df_check.dtypes)
-
-#             # Convert string columns to numeric BEFORE passing to calculate_signals
-#             numeric_columns = ['open', 'high', 'low', 'close', 'volume']
-#             for col in numeric_columns:
-#                 df_check[col] = pd.to_numeric(df_check[col], errors='coerce')
-
-#             # Remove any rows with NaN values
-#             df_check = df_check.dropna()
-
-#             # print("Data types after conversion:")
-#             # print(df_check.dtypes)
-#             # the following lines above have been added
-#             df_check.rename(columns={'open':'Open','high':'High','low':'Low','close':'Close','volume':'Volume'},inplace=True)
-#             # df_check = calculate_heiken_ashi_testnet(df=df_check)
-#             df_check = calculate_signals(df=df_check)
-#             df_check.rename(columns={'Open':'open','High':'high','Low':'low','Close':'close','Volume':'volume'},inplace=True)
-#             # print(df_check)
-#             df_check.to_csv("Delta_Final.csv")
-#             df = df_check
-#             df_position_check = df_check
-#             # current_position_time = df.iloc[-1]['time']
-
-#             if is_time_in_range_ist():
-#                 print(f"Trading time active: {is_time_in_range_ist()}")
-
-#                 if martingale_manager.h_pos != 0:
-#                     if fake_trade_flag != 0:
-#                         fake_signal_with_position = fake_trade_loss_checker(df_position_check, delta_client.current_candle_time)
-#                         set_flag_fake_trade(0)
-#                         logger.info(f"fake trade flag is reverted to {fake_trade_flag} , fake signal with position status is {fake_signal_with_position}")
-#                         if fake_signal_with_position:
-#                             print("🚨 Fake signal detected with active position!")
-                    
-#                     opposite_signal_exit = martingale_manager.check_opposite_signal()
-#                     # df = pd.read_csv("Delta_Final.csv")
-#                     df = delta_client.fetch_data_binance()
-#                     df = calculate_signals(df)
-#                     print(f"current entry signal is {entry_signal} and current signal is {df.iloc[-1]['Signal_Final']}")
-    
-#                     if opposite_signal_exit:
-#                         print("🚨 Position closed due to opposite signal!")
-#                         # Check fake loss limit (same logic as fake_trade_loss_checker)
-#                         if fake_loss_amount >= fake_loss_amount_maxlimit:
-#                                 print("🔥 FAKE LOSS LIMIT REACHED from opposite signals!")
-#                                 if martingale_manager.current_level < martingale_manager.max_levels - 1:
-#                                     martingale_manager.current_level += 1
-#                                     print(f"Increasing martingale level to {martingale_manager.current_level}")
-#                                 else:
-#                                     print("Max martingale level reached. Resetting to 0.")
-#                                     martingale_manager.current_level = 0
-                                
-#                                 fake_loss_amount = 0  # Reset
-#                                 print(f"New leverage: {martingale_manager.get_leverage()}x")
-#                         continue
-
-#                     try:
-#                         print("📊 Existing position detected - monitoring...")
-#                         position_closed = martingale_manager.monitor_and_close_position()
-#                         if position_closed:
-#                             print("✅ Position monitoring completed")
-#                             # Continue to next cycle to look for new signals
-#                             continue
-#                     except Exception as monitor_e:
-#                         print(f"Error monitoring position: {monitor_e}")
-#                         continue
-                
-#                 # Check if we can take a trade (no active positions)
-#                 can_trade = delta_client.get_active_positions()
-#                 print(f"can trade status is {can_trade}")
-                
-#                 if can_trade and martingale_manager.can_take_trade():
-#                 # if 1==1:
-#                     try:
-#                         last_candle = df.iloc[-1]
-#                         entry_signal = last_candle['Signal_Final']
-#                         current_price = delta_client.get_market_price()
-                        
-#                         print(f"📊 Current Price: ${current_price}")
-#                         print(f"📈 Signal: {entry_signal}")
-#                         print(f"📊 RM1 Level: {martingale_manager.current_level}")
-
-#                         # Check for entry signal
-#                         if entry_signal in DESIRED_TYPES and entry_signal != 0:
-#                             try:
-#                                 # logger.info(f"a new order is about to be placed with entry_signal : {entry_signal}")
-#                                 delta_client.current_candle_time = int(df.iloc[-1]['time']) # placing getting time before anything
-#                                 direction = "buy" if int(entry_signal) > 0 else "sell"
-#                                 print(f"🎯 Taking {direction.upper()} trade!")
-
-#                                 # Calculate trade parameters
-#                                 i = len(df) - 1
-#                                 row = df.iloc[i]
-#                                 prev_row = df.iloc[i-1]
-#                                 second_last_row = df.iloc[i-2] if i > 1 else prev_row
-
-#                                 entry_price = int(current_price)
-#                                 sl, tp = risk_manager.calculate_sl_tp(entry_price, direction, prev_row, second_last_row)
-#                                 sl = float(sl)
-#                                 tp = float(tp)
-                                
-#                                 # Get current leverage and calculate trade size
-#                                 current_leverage = martingale_manager.get_leverage()
-#                                 trade_amount = delta_client.calculate_trade_size(entry_price, current_leverage, base_capital)
-                                
-#                                 # Set leverage before placing trade
-#                                 delta_client.set_leverage(current_leverage)
-                                
-#                                 print(f"🎯 Trade Details:")
-#                                 print(f"  Direction: {direction.upper()}")
-#                                 print(f"  Entry Price: ${entry_price}")
-#                                 print(f"  Stop Loss: ${sl}")
-#                                 print(f"  Take Profit: ${tp}")
-#                                 print(f"  Quantity: {trade_amount}")
-#                                 print(f"  Leverage: {current_leverage}x")
-#                                 print(f"  Notional: ${trade_amount * entry_price}")
-                                
-#                                 # Check balance
-#                                 balance = delta_client.get_usd_balance()
-#                                 print(f"Account Balance: ${balance}")
-                                
-#                                 # Step 1: Place market order first
-#                                 print("📝 Placing market order...")
-#                                 # current_candle_time = df.iloc[-1]['time']
-#                                 current_price = delta_client.get_market_price()
-#                                 logger.info(f"current_price is {current_price} before placing the market order")
-#                                 print(f"market size is ")
-#                                 market_order = delta_client.place_order_market(direction, trade_amount) # this is where the market order is placed , only place where the entry candle is set
-#                                 set_candle_entry_time(time=df.iloc[-1]['time'])
-#                                 logger.info(f"the market order has been placed and response is {market_order}")
-#                                 martingale_manager.balance_before = delta_client.get_usd_balance() # here we set the initial balance while taking the trade and then we subract the price after exit from it
-#                                 martingale_manager.h_pos = int(entry_signal / 2) # this will work since the entry condition is only 2 
-                                
-#                                 if market_order:
-#                                     print(f"✅ Market order placed: {market_order.get('id')}")
-#                                     set_trade_tracking(entry_signal, direction, entry_price, delta_client.current_candle_time)
-#                                     # fake_trade_flag = 1
-#                                     set_flag_fake_trade(1)
-#                                     logger.info(f"since a new trade is being opened the fake trade flag is {fake_trade_flag}")
-#                                     # ===== END TRADE TRACKING (LOCATION 2) =====
-                                    
-#                                     # Wait a moment for the order to fill
-#                                     # time.sleep(2) # decreased from 3 to 2 - important
-                                    
-#                                     # Step 2: Place bracket order for SL/TP management
-#                                     print("📝 Placing bracket order for SL/TP...")
-#                                     try:
-#                                         logger.info(f"placing order at sl: {sl} , tp: {tp}")
-#                                         bracket_order_res = delta_client.place_order_bracket(
-#                                             side=direction,
-#                                             size=trade_amount,
-#                                             entry_price=entry_price,
-#                                             stop_price=sl,
-#                                             take_profit_price=tp
-#                                         )
-#                                         print(f"bracket order res is {bracket_order_res}")
-#                                         logger.info(f"bracket order response is {bracket_order_res}")
-#                                         if not bracket_order_res or not bracket_order_res.get('success',False):
-#                                             raise Exception("Bracket order placement failed")
-#                                     except Exception as e:
-#                                         print(f"Initial bracket order failed {e}")
-#                                         time.sleep(1) # important - can't change 
-#                                         if direction.lower() == 'buy':
-#                                             sl = round(sl-7,2)
-#                                             tp = round(tp+5,2)
-#                                         elif direction.lower() == 'sell':
-#                                             sl = round(sl+7,2)
-#                                             tp = round(tp-5,2)
-#                                         else:
-#                                             print(f"Invalid direction {direction}")
-                                        
-#                                         try:
-#                                             logger.info(f"placing order since last bracket order failed at sl: {sl} , tp: {tp}")
-#                                             bracket_order_res = delta_client.place_order_bracket(
-#                                                 side=direction,
-#                                                 size=trade_amount,
-#                                                 entry_price=entry_price,
-#                                                 stop_price=sl,
-#                                                 take_profit_price=tp
-#                                             )
-#                                             print(f"fallback bracket order response {bracket_order_res}")
-#                                         except Exception as e2:
-#                                             print(f"fallback bracket order also has failed {e2}")
-#                                             bracket_order_res = None
-#                                             current_price = delta_client.get_market_price()
-#                                             if direction == 'buy':
-#                                                 logger.info(f"since the fallback market order also failed we are closing the order at {current_price}")
-#                                                 delta_client.place_order_market(side='sell',size=martingale_manager.last_quantity)
-#                                                 martingale_manager.clear_position()
-#                                                 reset_candle_entry_exit_time()
-#                                             else:
-#                                                 logger.info(f"since the fallback market order also failed we are closing the order at {current_price}")
-#                                                 delta_client.place_order_market(side='buy',size=martingale_manager.last_quantity)
-#                                                 martingale_manager.clear_position()
-#                                                 reset_candle_entry_exit_time()
-#                                     try:
-#                                         bracket_tp_order_id = bracket_order_res['result']['take_profit_order']['id']
-#                                         bracket_sl_order_id = bracket_order_res['result']['stop_loss_order']['id']
-#                                     except Exception as e:
-#                                         try:
-#                                             bracket_tp_order_id = bracket_order_res['take_profit_order']['id']
-#                                             bracket_sl_order_id = bracket_order_res['stop_loss_order']['id']
-#                                         except Exception as e:
-#                                             print(f"exception {e} occured.")
-
-#                                     current_bracket_state_tp = delta_client.get_order_status(order_id=bracket_tp_order_id)
-#                                     current_bracket_state_sl = delta_client.get_order_status(order_id=bracket_sl_order_id)
-#                                     print(f"current bracket order tp id is {bracket_tp_order_id} and state is {current_bracket_state_tp}")
-#                                     print(f"current bracket order tp id is {bracket_sl_order_id} and state is {current_bracket_state_sl}")
-                                        
-#                                     # Set position status
-#                                     if direction == "buy":
-#                                         entry_signal = 2
-#                                     else:
-#                                         entry_signal = -2
-#                                     martingale_manager.set_position(direction, entry_price, sl, tp, trade_amount,entry_signal)
-                                        
-#                                     # Wait for bracket order to complete (simplified approach)
-#                                     print("⏳ Waiting for bracket order to complete...")
-#                                 else:
-#                                     print("❌ Failed to place market order")
-#                                     reset_trade_tracking()
-#                                     # ===== END TRADE TRACKING RESET (LOCATION 7) =====
-                                    
-#                             except Exception as signal_e:
-#                                 print(f"❌ Error processing signal: {signal_e}")
-#                                 reset_trade_tracking()
-#                         else:
-#                             print("⏸️ No trading signal detected")
-                            
-#                     except Exception as fetch_e:
-#                         print(f"Error fetching data or processing signals: {fetch_e}")
-#                         continue
-                
-#                 # Status summary
-#                 try:
-#                     print(f"\n📊 System Status:")
-#                     print(f"  RM1 Level: {martingale_manager.current_level}")
-#                     print(f"  Next Leverage: {martingale_manager.get_leverage()}x")
-#                     print(f"  Capital: ${martingale_manager.base_capital}")
-#                     print(f"  Position: h_pos = {martingale_manager.h_pos}")
-#                     print(f"  Fake Loss Amount: ${fake_loss_amount:.2f}")
-#                     print(f"  Trade Tracking Active: {trade_taken_time is not None}")
-#                 except Exception as status_e:
-#                     print(f"Error displaying status: {status_e}")
-                
-#                 # Sleep between cycles
-#                 print(f"💤 Sleeping for {1} seconds...")
-#                 time.sleep(1) # change this from 3s to 1.5s - important
-#             else:
-#                 print("Outside trading hours, sleeping...")
-#                 time.sleep(1)  # Sleep 1 minutes when outside trading hours - doesn't matter 
-                
-#         except Exception as e:
-#             print(f"❌ Error in main loop: {e}") 
-#             time.sleep(1) # doesn't matter
-#             continue
 
 if __name__ == "__main__":
     try:

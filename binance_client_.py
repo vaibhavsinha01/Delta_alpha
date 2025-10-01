@@ -6,15 +6,20 @@ import time
 import hmac
 import hashlib
 from utils.binance_client import BinanceClient as Client
+import websocket
+import json
+import threading 
+from collections import deque
 
 class BinanceClient:
     def __init__(self, api_key, api_secret_key,testnet=0):
         self.api_key = api_key
         self.api_secret_key = api_secret_key
-        if testnet==1:
-            self.base_url ="https://testnet.binancefuture.com"
-        else:
-            self.base_url="https://fapi.binance.com"
+        self.base_url="https://fapi.binance.com"
+        # if testnet==1:
+        #     self.base_url ="https://testnet.binancefuture.com"
+        # else:
+        #     self.base_url="https://fapi.binance.com"
             
         self.client = Client(api_key,api_secret_key)
 
@@ -285,13 +290,14 @@ class BinanceClient:
 
 if __name__ == "__main__":
     # Securely load API keys from environment variables
-    api_key = '1ff87751c4a5a314b617856c252f342ee4aeff38797361ab676088330b1c26b1'  # Your Binance API key
-    api_secret_key = '4a924ff228b870e760d42891db0a6b50a61139453232de53d7b80b7d3a7744ef'  # Your Binance API secret
+    api_key = 'otVLRJLjAbZuuLZbzO7bNLCFoVyb6Nrja9kM0MtLqpWHGKVovvlHRatsejw0roJH'  # Your Binance API key
+    api_secret_key = '3YeoEi76yUWBpUcQ607ZhQGc9hWYq0qQfLXWksKtojRJz1Wl43bd9oc1MP5InOok'  # Your Binance API secret
 
     client = BinanceClient(api_key, api_secret_key,testnet=0)
     # client.set_leverage(symbol='ETHUSD.P',leverage=50)
-    res = client.get_klines(symbol='ETHUSDT',interval='15m',limit=100)
-    print(res)
+    while True:
+        res = client.get_klines(symbol='ETHUSDT',interval='15m',limit=100)
+        print(res.iloc[-1]['close'])
 
     # if client.login():
     #     symbol = "ETHUSD.P"  # Example symbol

@@ -2,8 +2,6 @@ import pandas as pd
 import numpy as np
 
 # Load the CSV
-# file_path = r"C:\Users\vaibh\OneDrive\Desktop\alhem_2\trading_binance\indicator_eth.csv"
-# file_path = r"C:\Users\vaibh\OneDrive\Desktop\alhem_2\trading_binance\Binance_Final.csv"
 file_path = r"C:\Users\vaibh\OneDrive\Desktop\alhem_2\trading_binance\Delta_Final.csv"
 df = pd.read_csv(file_path)
 
