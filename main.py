@@ -33,8 +33,9 @@ current_bracket_state_sl = None
 fake_trade_flag = 0
 candle_entry = None
 candle_exit = None
-double_trigger_flag = False # track if double trigger occured
-pending_double_trigger = False # track if next level increase should be double
+# double_trigger_flag = False # track if double trigger occured
+# pending_double_trigger = False # track if next level increase should be double
+DOUBLE_TRIGGER_WINDOW = RENTRY_TIME_BINANCE # for the 15 the timeframe being used for trading - ONE CANDLE ONLY 
 
 class DeltaBroker:
     def __init__(self):
@@ -116,11 +117,11 @@ class DeltaBroker:
                 entry_price = self.get_market_price()
 
             if side == "buy":
-                stop_limit_price = str(float(stop_price) - 2)  # Slightly lower than stop
-                take_profit_limit_price = str(float(take_profit_price) - 2)  # Slightly lower than TP
+                stop_limit_price = str(float(stop_price) - STOP_LIMIT_PRICE_AMOUNT)  # Slightly lower than stop
+                take_profit_limit_price = str(float(take_profit_price) - STOP_LIMIT_PRICE_AMOUNT)  # Slightly lower than TP
             else:
-                stop_limit_price = str(float(stop_price) + 2)  # Slightly higher than stop
-                take_profit_limit_price = str(float(take_profit_price) + 2)  # Slightly higher than TP
+                stop_limit_price = str(float(stop_price) + STOP_LIMIT_PRICE_AMOUNT)  # Slightly higher than stop
+                take_profit_limit_price = str(float(take_profit_price) + STOP_LIMIT_PRICE_AMOUNT)  # Slightly higher than TP
 
             payload = {
                 "product_symbol": self.product_symbol_place_order,
@@ -501,7 +502,7 @@ class DeltaBroker:
         end_time = int(time.time() * 1000)
         start_time = end_time - (interval_seconds * 1000 * limit)
         # self.df = binance_client.get_klines(symbol=BINANCE_SYMBOL,interval=BINANCE_INTERVAL,limit=199)
-        self.df = binance_client.get_klines(symbol="ETHUSD",category="inverse",interval="15",limit=200)
+        self.df = binance_client.get_klines(symbol="ETHUSD",category="inverse",interval=BYBIT_INTERVAL,limit=200)
         self.df['Timestamp'] = pd.to_datetime(self.df['time'],unit='ms')
         self.df.sort_values(by='Timestamp',ascending=False,inplace=True)
         self.df = self.df.iloc[::-1].reset_index(drop=True)
@@ -574,11 +575,31 @@ class MartingaleManager:
         self.last_quantity = None
         self.h_pos = 0
         self.double_trigger_prevention = False # track double trigger events
+        # Double trigger tracking
+        self.last_loss_timestamp = None
+        self.last_loss_type = None  # 'sl' or 'fake'
+        self.pending_second_increment = False 
+        self.start_elevated_after_martingale = False
         
+    # def get_leverage(self):
+    #     """Get current leverage based on RM1 system"""
+    #     try:
+    #         return self.base_leverage * self.leverage_multipliers[self.current_level]
+    #     except Exception as e:
+    #         print(f"Error getting leverage: {e}")
+    #         return self.base_leverage
+
     def get_leverage(self):
-        """Get current leverage based on RM1 system"""
+        """Get current leverage based on RM1 system with post-martingale elevation"""
         try:
-            return self.base_leverage * self.leverage_multipliers[self.current_level]
+            # If we just completed martingale and are at level 0, start at level 1 instead
+            if self.current_level == 0 and self.start_elevated_after_martingale:
+                effective_level = 1  # Start at 20x instead of 10x
+                logger.info(f"POST-MARTINGALE: Starting at elevated level 1 (20x) instead of base")
+            else:
+                effective_level = self.current_level
+                
+            return self.base_leverage * self.leverage_multipliers[effective_level]
         except Exception as e:
             print(f"Error getting leverage: {e}")
             return self.base_leverage
@@ -626,69 +647,135 @@ class MartingaleManager:
             print("Position cleared: h_pos = 0")
         except Exception as e:
             print(f"Error clearing position: {e}")
+    
+    # def update_trade_result(self, result, is_fake_trigger=False):
+    #     """Update trade result and adjust system based on RM1 with time-based double-trigger prevention"""
+        
+    #     try:
+    #         import time
+    #         self.last_trade_result = result
+    #         current_time = time.time()
+            
+    #         if result == 'win':
+    #             self.current_level = 0
+    #             self.last_loss_timestamp = None
+    #             self.last_loss_type = None
+    #             print(f"Trade won! Resetting to level 0, leverage: {self.get_leverage()}x")
+    #             logger.info(f"WIN: Reset to level 0, leverage: {self.get_leverage()}x")
+                    
+    #         elif result == 'loss':
+    #             loss_type = 'fake' if is_fake_trigger else 'sl'
+
+    #             logger.info(f"LOSS detected: type={loss_type}, current_level={self.current_level}")
+    #             logger.info(f"Previous loss: type={self.last_loss_type}, timestamp={self.last_loss_timestamp}")
+                
+    #             # Check for REAL double trigger (both events within time window)
+    #             if self.last_loss_timestamp is not None:
+    #                 time_diff = current_time - self.last_loss_timestamp
+                    
+    #                 if time_diff <= DOUBLE_TRIGGER_WINDOW and self.last_loss_type != loss_type:
+    #                     print(f"DOUBLE TRIGGER DETECTED! {self.last_loss_type.upper()} + {loss_type.upper()} within {time_diff:.1f}s")
+    #                     logger.info(f"Double trigger: {self.last_loss_type} at {self.last_loss_timestamp}, {loss_type} at {current_time} (diff: {time_diff:.1f}s)")
+                        
+    #                     # Skip second increment - first loss already incremented
+    #                     print("DOUBLE TRIGGER: Only the first loss was counted. Second loss skipped.")
+    #                     logger.info("Double trigger detected: Skipping second increment to prevent double-counting")
+                        
+    #                     # Clear tracking
+    #                     self.last_loss_timestamp = None
+    #                     self.last_loss_type = None
+    #                     return
+                        
+    #                 elif time_diff > DOUBLE_TRIGGER_WINDOW:
+    #                     logger.info(f"NOT a double trigger - time gap too large ({time_diff:.1f}s > {DOUBLE_TRIGGER_WINDOW}s)")
+    #                     print(f"NOT a double trigger - events too far apart ({time_diff:.1f}s > {DOUBLE_TRIGGER_WINDOW}s)")
+                
+    #             # Normal single increment (applies to all non-double-trigger losses)
+    #             if self.current_level >= self.max_levels - 1:
+    #                 print(f"Max level {self.max_levels - 1} reached! Resetting to level 0")
+    #                 logger.info(f"Max level reached, resetting from {self.current_level} to 0")
+    #                 self.current_level = 0
+    #             else:
+    #                 self.current_level += 1
+    #                 print(f"Trade lost! Moving to level {self.current_level}, leverage: {self.get_leverage()}x")
+    #                 logger.info(f"LOSS ({loss_type}): Level {self.current_level}, leverage: {self.get_leverage()}x")
+                
+    #             # Track this loss for potential double trigger detection
+    #             self.last_loss_timestamp = current_time
+    #             self.last_loss_type = loss_type
+                    
+    #         logger.info(f"Current leverage level: {self.current_level}, Last loss: {self.last_loss_type} at {self.last_loss_timestamp}")
+            
+    #     except Exception as e:
+    #         print(f"Error updating trade result: {e}")
+    #         logger.error(f"Error in update_trade_result: {e}")
 
     def update_trade_result(self, result, is_fake_trigger=False):
-        """Update trade result and adjust system based on RM1 with double-trigger prevention"""
-        global double_trigger_flag, pending_double_trigger
+        """Update trade result - ALLOWS both losses but prevents double-counting"""
         
         try:
+            import time
             self.last_trade_result = result
-            
+            current_time = time.time()
             if result == 'win':
+                if self.current_level > 0:
+                    self.start_elevated_after_martingale = True
+                    logger.info("✅ Martingale cycle completed! Next trade will start at level 1 (20x)")
+                elif self.current_level == 0 and not self.start_elevated_after_martingale:
+                    pass
+                else:
+                    self.start_elevated_after_martingale = False
+                    logger.info("✅ Elevated start cycle complete, returning to normal base")
+                
                 self.current_level = 0
-                double_trigger_flag = False
-                pending_double_trigger = False
+                self.last_loss_timestamp = None
+                self.last_loss_type = None
                 print(f"Trade won! Resetting to level 0, leverage: {self.get_leverage()}x")
+                logger.info(f"WIN: Reset to level 0, leverage: {self.get_leverage()}x")
                     
             elif result == 'loss':
-                # Check if this is a double trigger scenario
-                if double_trigger_flag and is_fake_trigger:
-                    print("DOUBLE TRIGGER DETECTED! Preventing duplicate level increase")
-                    pending_double_trigger = True
-                    double_trigger_flag = False
-                    logger.info("Double trigger detected - skipping fake loss increase, setting pending compensation")
-                    return  # Skip this increase entirely
+                loss_type = 'fake' if is_fake_trigger else 'sl'
+
+                logger.info(f"LOSS detected: type={loss_type}, current_level={self.current_level}")
                 
-                # Handle pending compensation from previous double trigger
-                if pending_double_trigger and not is_fake_trigger:
-                    print("PENDING COMPENSATION: Applying missed fake loss increase")
-                    # Apply normal SL increase
-                    if self.current_level >= self.max_levels - 1:
-                        self.current_level = 0
-                        print("SL increase: Max level reached, resetting to 0")
-                    else:
-                        self.current_level += 1
-                        print(f"SL increase: Level {self.current_level}, leverage: {self.get_leverage()}x")
+                # Check if this is second loss of a double-trigger pair
+                if self.last_loss_timestamp is not None:
+                    time_diff = current_time - self.last_loss_timestamp
                     
-                    # Apply the compensatory fake loss increase
-                    if self.current_level >= self.max_levels - 1:
-                        self.current_level = 0
-                        print("Fake loss compensation: Max level reached, resetting to 0")
-                    else:
-                        self.current_level += 1
-                        print(f"Fake loss compensation: Level {self.current_level}, leverage: {self.get_leverage()}x")
-                    
-                    pending_double_trigger = False
+                    if time_diff <= DOUBLE_TRIGGER_WINDOW and self.last_loss_type != loss_type:
+                        print(f"DOUBLE TRIGGER DETECTED! {self.last_loss_type.upper()} + {loss_type.upper()} within {time_diff:.1f}s")
+                        logger.info(f"Double trigger: {self.last_loss_type} at {self.last_loss_timestamp}, {loss_type} at {current_time}")
+                        
+                        self.pending_second_increment = True
+                        logger.info("Double trigger: Deferring second increment to next trade")
+                        
+                        self.last_loss_timestamp = None
+                        self.last_loss_type = None
+                        return
+                
+                # Normal single increment OR deferred second increment
+                if self.current_level >= self.max_levels - 1:
+                    print(f"Max level {self.max_levels - 1} reached! Resetting to level 0")
+                    logger.info(f"Max level reached, resetting from {self.current_level} to 0")
+                    self.current_level = 0
+                    self.pending_second_increment = False
+                    self.start_elevated_after_martingale = False  # Clear on max level reset
                 else:
-                    # Normal single increase
-                    if self.current_level >= self.max_levels - 1:
-                        print("Max level reached! Resetting to beginning (level 0)")
-                        self.current_level = 0
-                    else:
-                        self.current_level += 1
-                        print(f"Trade lost! Moving to level {self.current_level}, leverage: {self.get_leverage()}x")
+                    self.current_level += 1
+                    print(f"Trade lost! Moving to level {self.current_level}, leverage: {self.get_leverage()}x")
+                    logger.info(f"LOSS ({loss_type}): Level {self.current_level}, leverage: {self.get_leverage()}x")
                 
-                # Set flag for potential double trigger on regular SL hits
-                if not is_fake_trigger:
-                    double_trigger_flag = True
+                self.last_loss_timestamp = current_time
+                self.last_loss_type = loss_type
                     
-            logger.info(f"Current leverage level: {self.current_level}, Double trigger flag: {double_trigger_flag}, Pending: {pending_double_trigger}")
+            logger.info(f"Current leverage level: {self.current_level}, Start elevated: {self.start_elevated_after_martingale}")
             
         except Exception as e:
             print(f"Error updating trade result: {e}")
-    
+            logger.error(f"Error in update_trade_result: {e}")
+
     def check_opposite_signal(self):
-        global double_trigger_flag,pending_double_trigger
+        # global double_trigger_flag,pending_double_trigger
         """Check for opposite signal and close if detected"""
         try:
             # Get fresh data
@@ -744,6 +831,8 @@ class MartingaleManager:
                         
                         # NEW: Use double-trigger prevention system instead of direct level manipulation
                         if fake_loss_amount >= fake_loss_amount_maxlimit:
+                            logger.info(f"Fake loss limit reached: ${fake_loss_amount:.2f} >= ${fake_loss_amount_maxlimit}")
+                            logger.info(f"Calling update_trade_result with is_fake_trigger=True")
                             print("🔥 FAKE LOSS LIMIT REACHED from opposite signals!")
                             martingale_manager.update_trade_result('loss', is_fake_trigger=True)
                             fake_loss_amount = 0  # Reset fake loss tracking
@@ -762,7 +851,7 @@ class MartingaleManager:
             return False
 
     def monitor_and_close_position(self):
-        global double_trigger_flag,pending_double_trigger
+        # global double_trigger_flag,pending_double_trigger
         try:
             if self.h_pos == 0:
                 return False
@@ -800,7 +889,7 @@ class MartingaleManager:
                     self.clear_position()
                     set_candle_exit_time(self.df.iloc[-1]['time'])
 
-                    # print("🛌 Sleeping for 900 seconds to avoid re-entry in same candle...")
+                    # print("🛌 Sleeping for one candle seconds to avoid re-entry in same candle...")
                     if check_entry_exit_same_candle_condition():
                         logger.info(f"here we are going to sleep for {RENTRY_TIME_BINANCE} since the entry and exit time is the same")
                         time.sleep(RENTRY_TIME_BINANCE)
@@ -890,7 +979,8 @@ def set_flag_fake_trade(flag):
     fake_trade_flag = int(flag)
 
 def fake_trade_loss_checker(df, current_time):
-    global fake_loss_amount, trade_taken_time, trade_taken_signal, trade_taken_price, trade_taken_direction,double_trigger_flag,pending_double_trigger
+    global fake_loss_amount, trade_taken_time, trade_taken_signal, trade_taken_price, trade_taken_direction
+    # global double_trigger_flag,pending_double_trigger
 
     try:
         start_balance = float(delta_client.get_usd_balance())
@@ -951,7 +1041,7 @@ def fake_trade_loss_checker(df, current_time):
                         reset_trade_tracking()
                         logger.info(f"the current martingale level is {martingale_manager.current_level}")
                         import time
-                        # print(f"sleeping for 900 seconds to prevent re-entry")
+                        # print(f"sleeping for one candle seconds to prevent re-entry")
                         if check_entry_exit_same_candle_condition():
                             logger.info(f"here we are going to sleep for {RENTRY_TIME_BINANCE} since the entry and exit time is the same")
                             time.sleep(RENTRY_TIME_BINANCE)
@@ -974,7 +1064,7 @@ def fake_trade_loss_checker(df, current_time):
         return False
 
 def close_position_on_fake_signal():
-    global double_trigger_flag,pending_double_trigger
+    # global double_trigger_flag,pending_double_trigger
     """Close position by placing opposite order of same size"""
     try:
         if martingale_manager.h_pos != 0:
@@ -1134,11 +1224,6 @@ def calculate_signals(df):
         df.rename(columns={'Close':'close','Open':'open','High':'high','Low':'low','Volume':'volume'},inplace=True)
         df['rsi'],df['rsi_buy'],df['rsi_sell'] = bsrsi.generate_signals(df['close'])
         df = calculate_inside_ib_box(df)
-        
-        # columns_to_drop = [
-        #     'RF_UpperBand', 'RF_LowerBand', 'RF_Filter', 'RF_Trend',
-        #     'IsIB', 'BoxHigh', 'BoxLow', 'BarColor','rsi'
-        # ]
         columns_to_drop = [
             'RF_UpperBand', 'RF_LowerBand','RF_Trend',
             'IsIB', 'BoxHigh', 'BoxLow', 'BarColor','rsi'
@@ -1438,6 +1523,13 @@ if __name__ == "__main__":
                                 sl = float(sl)
                                 tp = float(tp)
                                 
+                                # Apply deferred increment from previous double trigger
+                                # if hasattr(martingale_manager, 'pending_second_increment') and martingale_manager.pending_second_increment:
+                                #     if martingale_manager.current_level < martingale_manager.max_levels - 1:
+                                #         martingale_manager.current_level += 1
+                                #         martingale_manager.pending_second_increment = False
+                                #         logger.info(f"🔄 Applied deferred double-trigger increment to level {martingale_manager.current_level}")
+
                                 # Get current leverage and calculate trade size
                                 current_leverage = martingale_manager.get_leverage()
                                 trade_amount = delta_client.calculate_trade_size(entry_price, current_leverage, base_capital)
@@ -1535,6 +1627,12 @@ if __name__ == "__main__":
                                             bracket_sl_order_id = bracket_order_res['stop_loss_order']['id']
                                         except Exception as e:
                                             print(f"exception {e} occured.")
+                                    
+                                    if hasattr(martingale_manager, 'pending_second_increment') and martingale_manager.pending_second_increment:
+                                    if martingale_manager.current_level < martingale_manager.max_levels - 1:
+                                        martingale_manager.current_level += 1
+                                        martingale_manager.pending_second_increment = False
+                                        logger.info(f"🔄 Applied deferred double-trigger increment to level {martingale_manager.current_level}")
 
                                     current_bracket_state_tp = delta_client.get_order_status(order_id=bracket_tp_order_id)
                                     current_bracket_state_sl = delta_client.get_order_status(order_id=bracket_sl_order_id)
@@ -1547,6 +1645,8 @@ if __name__ == "__main__":
                                     else:
                                         signal_for_position = -2
                                     martingale_manager.set_position(direction, entry_price, sl, tp, trade_amount, signal_for_position)
+                                    # Clear elevated start flag after using it for this trade
+                                    
                                         
                                     print("⏳ Waiting for bracket order to complete...")
                                 else:
@@ -1571,9 +1671,11 @@ if __name__ == "__main__":
                     print(f"  Capital: ${martingale_manager.base_capital}")
                     print(f"  Position: h_pos = {martingale_manager.h_pos}")
                     print(f"  Fake Loss Amount: ${fake_loss_amount:.2f}")
-                    print(f"  Double Trigger Flag: {double_trigger_flag}")
-                    print(f"  Pending Double Trigger: {pending_double_trigger}")
+                    # print(f"  Double Trigger Flag: {double_trigger_flag}")
+                    # print(f"  Pending Double Trigger: {pending_double_trigger}")
                     print(f"  Trade Tracking Active: {trade_taken_time is not None}")
+                    if martingale_manager.last_loss_timestamp:
+                        print(f"  Last Loss: {martingale_manager.last_loss_type} at {datetime.fromtimestamp(martingale_manager.last_loss_timestamp).strftime('%H:%M:%S')}")
                 except Exception as status_e:
                     print(f"Error displaying status: {status_e}")
                 
