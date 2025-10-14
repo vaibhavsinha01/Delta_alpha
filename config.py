@@ -5,7 +5,7 @@
 BINANCE_API_KEY = "otVLRJLjAbZuuLZbzO7bNLCFoVyb6Nrja9kM0MtLqpWHGKVovvlHRatsejw0roJH"
 BINANCE_API_SECRET = "3YeoEi76yUWBpUcQ607ZhQGc9hWYq0qQfLXWksKtojRJz1Wl43bd9oc1MP5InOok"
 BINANCE_SYMBOL = 'ETHUSDT'  # Trading pair - changed from BTCUSDT
-BINANCE_INTERVAL = '1m'  # Candle intervals
+BINANCE_INTERVAL = '5m'  # Candle intervals
 BINANCE_TESTNET_STATUS = 0 # use this to trade on the testnet and set the value to 0 to trade on the mainnet , remainder that there are separate api_keys,api_secrets for the binance_testnet_status
 BYBIT_API_KEY = "aasoVM0IEQQe0ompqj"
 BYBIT_API_SECRET = "iIRaNq4d26IocVvYPnpS3Tb5Do9IVNRu7n5S"
@@ -40,11 +40,12 @@ START_MINUTE = 00
 END_HOUR = 23
 END_MINUTE = 59
 
-RENTRY_TIME_BINANCE = 60 # this is the time in seconds to enter once the trade has been closed for binance
+RENTRY_TIME_BINANCE = 300 # this is the time in seconds to enter once the trade has been closed for binance
 MASTER_HEIKEN_CHOICE = 1
-BYBIT_INTERVAL = "1" # use 60 for 1h , 15 for 15m etc 
+BYBIT_INTERVAL = "5" # use 60 for 1h , 15 for 15m etc 
 
 DESIRED_TYPES = [2,4,-2,-4]
+# DESIRED_TYPES = [2,-2]
 
 # CONFIG FOR THE DELTA EXCHANGE
 
@@ -57,10 +58,10 @@ DELTA_SYMBOL_PLACE_ORDER = "ETHUSD" # used for placing order
 DELTA_TOKEN = 3136
 DELTA_MIN_LOT = 0.01
 DELTA_BASE_LEVERAGE = 10 # change the base leverage also
-DELTA_FAKE_LOSS_MAX_AMOUNT = 0.02 # this amount is in dollars 
-DELTA_INTERVAL = "1m" 
-DELTA_SL_BUFFER_POINTS = 5
-DELTA_TP_PERCENT = 0.18
-DELTA_INITIAL_CAPITAL = 600
-N_CANDLE_LOOKBACK = 5
+DELTA_FAKE_LOSS_MAX_AMOUNT = 0.05 # this amount is in dollars 
+DELTA_INTERVAL = "5m" 
+DELTA_SL_BUFFER_POINTS = 10
+DELTA_TP_PERCENT = 0.45
+DELTA_INITIAL_CAPITAL = 550
+N_CANDLE_LOOKBACK = 3
 STOP_LIMIT_PRICE_AMOUNT = 1
