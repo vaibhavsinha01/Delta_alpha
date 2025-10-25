@@ -566,6 +566,7 @@ class MartingaleManager:
         self.balance_before = None # this value is updated when the trade is taken , used for the opposite trade
 
         # Position tracking
+
         self.entry_signal = None
         self.position_order_id = None
         self.last_tp_price = None
@@ -574,7 +575,6 @@ class MartingaleManager:
         self.last_direction = None
         self.last_quantity = None
         self.h_pos = 0
-        
         # Double trigger tracking
         self.last_loss_timestamp = None
         self.last_loss_type = None  # 'sl' or 'fake'
@@ -583,10 +583,6 @@ class MartingaleManager:
         self.double_trigger_occurred_this_cycle = False  # Track if double trigger happened in current martingale cycle
         self.skip_fake_losses_this_cycle = False
         self.in_martingale_cycle = False  # NEW: Track if we're in an active martingale cycle
-        
-        # NEW: Fake loss flag tracking for elevated starts
-        self.fake_loss_flag = False  # Tracks if fake loss limit was reached and should be used for elevated start
-        self.sl_cycle_started = False  # Tracks if SL cycle has started (affects fake loss accumulation)
 
     def get_leverage(self):
         """Get current leverage based on RM1 system with post-martingale elevation"""
@@ -659,14 +655,14 @@ class MartingaleManager:
             current_time = time.time()
             
             if result == 'win':
-                # Handle win logic with fake loss flag consideration
+                # Handle post-martingale elevation logic
                 if self.current_level > 0:
-                    # Martingale cycle completed - check for fake loss flag
-                    if self.fake_loss_flag:
-                        # Fake loss flag is set, next trade starts elevated
+                    # Martingale cycle completed
+                    if self.double_trigger_occurred_this_cycle:
+                        # Double trigger happened, next trade starts at 20x
                         self.start_elevated_after_martingale = True
-                        self.fake_loss_flag = False  # Clear the flag after using it
-                        logger.info("Martingale complete with fake loss flag! Next at 20x (elevated start)")
+                        self.double_trigger_occurred_this_cycle = False
+                        logger.info("Martingale with double trigger! Next at 20x")
                     else:
                         # Normal martingale completion, return to base
                         self.start_elevated_after_martingale = False
@@ -682,7 +678,6 @@ class MartingaleManager:
                 self.last_loss_type = None
                 self.pending_second_increment = False
                 self.skip_fake_losses_this_cycle = False
-                self.sl_cycle_started = False  # Reset SL cycle flag
                 print(f"Trade won! Reset to L0, leverage: {self.get_leverage()}x")
                 logger.info(f"WIN: Reset to L0")
                     
@@ -690,92 +685,69 @@ class MartingaleManager:
                 loss_type = 'fake' if is_fake_trigger else 'sl'
                 logger.info(f"LOSS detected: type={loss_type}, level={self.current_level}")
                 
-                # Check for double trigger (SL + fake loss in same trade)
+                # Skip fake losses only if double trigger already occurred AND we're at max level
+                if is_fake_trigger and self.skip_fake_losses_this_cycle and self.current_level >= self.max_levels - 1:
+                    logger.info(f"SKIPPING fake loss - double trigger already occurred and at max level")
+                    print(f"Fake loss skipped (double trigger protection active)")
+                    return
+                
+                # Check for double trigger
                 if self.last_loss_timestamp is not None:
                     time_diff = current_time - self.last_loss_timestamp
                     
                     if time_diff <= DOUBLE_TRIGGER_WINDOW and self.last_loss_type != loss_type:
                         print(f"DOUBLE TRIGGER! {self.last_loss_type.upper()} + {loss_type.upper()}")
-                        logger.info(f"Double trigger detected - treating as SL only")
-                        
-                        # Double trigger is treated as SL event only
-                        # If the previous event was fake loss, we need to undo its increment
-                        if self.last_loss_type == 'fake':
-                            # Undo the fake loss increment that already happened
-                            self.current_level -= 1
-                            logger.info(f"Undoing fake loss increment for double trigger")
-                        
-                        # Now treat as SL only
-                        self.sl_cycle_started = True
-                        self.current_level += 1
-                        
-                        # CRITICAL: Clear fake loss flag for double trigger since it's treated as SL only
-                        if self.fake_loss_flag:
-                            self.fake_loss_flag = False
-                            logger.info(f"Clearing fake loss flag for double trigger (treated as SL only)")
-                        
+                        logger.info(f"Double trigger detected")
+
+                        # Check if we're at max level - if so, reset everything
+                        if self.current_level >= self.max_levels - 1:
+                            if self.double_trigger_occurred_this_cycle:
+                                logger.info(f"Max level reached with double trigger in cycle, resetting to level 1 (20x)")
+                                self.current_level = 1
+                            else:
+                                logger.info(f"Max level reached without double trigger, resetting to 0")
+                                self.current_level = 0
+                            self.pending_second_increment = False
+                            self.start_elevated_after_martingale = False
+                            self.double_trigger_occurred_this_cycle = False
+                            self.skip_fake_losses_this_cycle = False
+                        else:
+                            # New behavior: ignore extra increment caused by fake-loss when SL also occurs
+                            # Do NOT change current_level here. We keep only the single increment effect overall
+                            # and defer recovery via post-cycle elevation.
+                            self.pending_second_increment = False
+                            self.double_trigger_occurred_this_cycle = True  # activate elevation after martingale cycle
+                            self.skip_fake_losses_this_cycle = True
+
                         # Clear tracking
                         self.last_loss_timestamp = None
                         self.last_loss_type = None
-                        logger.info(f"DOUBLE TRIGGER handled as SL only, level: {self.current_level}")
+                        logger.info(f"DOUBLE TRIGGER handled with NO additional level bump; post-cycle elevation queued")
                         return
                 
-                # Normal loss handling
-                if loss_type == 'sl':
-                    # SL loss - increment level and mark SL cycle as started
-                    self.sl_cycle_started = True
-                    if self.current_level >= self.max_levels - 1:
-                        # Reset to elevated start if fake loss flag is set
-                        if self.fake_loss_flag:
-                            self.current_level = 1  # Start at 20x
-                            # DON'T clear fake_loss_flag here - it should be preserved for elevated start
-                            logger.info(f"Max level reached with fake loss flag, resetting to level 1 (20x)")
-                        else:
-                            self.current_level = 0  # Back to base
-                            logger.info(f"Max level reached, resetting to 0")
+                # Normal increment
+                if self.current_level >= self.max_levels - 1:
+                    # logger.info(f"Max level reached, resetting to 0")
+                    # self.current_level = 0
+                    if self.double_trigger_occurred_this_cycle:
+                        logger.info(f"Max level reached with double trigger in cycle, resetting to level 1 (20x)")
+                        self.current_level = 1
                     else:
-                        # CRITICAL FIX: Handle elevated start properly
-                        if self.current_level == 0 and self.start_elevated_after_martingale:
-                            # We're at elevated start (20x), next SL should go to level 2 (40x)
-                            self.current_level = 2
-                            self.start_elevated_after_martingale = False  # Clear elevated flag
-                            logger.info(f"SL LOSS at elevated start: Level {self.current_level} (40x)")
-                        else:
-                            self.current_level += 1
-                            logger.info(f"SL LOSS: Level {self.current_level}")
-                        
-                elif loss_type == 'fake':
-                    # Fake loss handling
-                    if not self.sl_cycle_started:
-                        # No SL cycle started yet - allow fake loss to increase level
-                        if self.current_level >= self.max_levels - 1:
-                            if self.fake_loss_flag:
-                                self.current_level = 1  # Start at 20x
-                                self.fake_loss_flag = False
-                                logger.info(f"Max level reached with fake loss flag, resetting to level 1 (20x)")
-                            else:
-                                self.current_level = 0  # Back to base
-                                logger.info(f"Max level reached, resetting to 0")
-                        else:
-                            # CRITICAL FIX: Handle elevated start properly for fake losses
-                            if self.current_level == 0 and self.start_elevated_after_martingale:
-                                # We're at elevated start (20x), fake loss should go to level 2 (40x)
-                                self.current_level = 2
-                                self.start_elevated_after_martingale = False  # Clear elevated flag
-                                logger.info(f"FAKE LOSS at elevated start: Level {self.current_level} (40x)")
-                            else:
-                                self.current_level += 1
-                                logger.info(f"FAKE LOSS (no SL cycle): Level {self.current_level}")
-                    else:
-                        # SL cycle has started - fake loss doesn't increase level but sets flag
-                        self.fake_loss_flag = True
-                        logger.info(f"FAKE LOSS (SL cycle active): Flag set, level remains {self.current_level}")
+                        logger.info(f"Max level reached without double trigger, resetting to 0")
+                        self.current_level = 0
+                    self.pending_second_increment = False
+                    self.start_elevated_after_martingale = False
+                    self.double_trigger_occurred_this_cycle = False
+                    self.skip_fake_losses_this_cycle = False
+                else:
+                    self.current_level += 1
+                    logger.info(f"LOSS ({loss_type}): Level {self.current_level}")
                 
                 self.last_loss_timestamp = current_time
                 self.last_loss_type = loss_type
                     
             # Add comprehensive logging
-            logger.info(f"Status: Level={self.current_level}, Elevated={self.start_elevated_after_martingale}, FakeFlag={self.fake_loss_flag}, SLCycle={self.sl_cycle_started}")
+            logger.info(f"Status: Level={self.current_level}, Elevated={self.start_elevated_after_martingale}, Pending={self.pending_second_increment}, DoubleTrigger={self.double_trigger_occurred_this_cycle}")
             print(f"Leverage: {self.get_leverage()}x, Level: {self.current_level}")
             
         except Exception as e:
@@ -805,7 +777,7 @@ class MartingaleManager:
                 if (self.entry_signal == 2 and current_signal == -2) or \
                 (self.entry_signal == -2 and current_signal == 2):    
                 
-                    logger.info(f"OPPOSITE SIGNAL DETECTED! Entry: {self.entry_signal}, Current: {current_signal}")
+                    logger.info(f" OPPOSITE SIGNAL DETECTED! Entry: {self.entry_signal}, Current: {current_signal}")
                     
                     # CRITICAL: Check if TP/SL already hit before attempting close
                     global bracket_tp_order_id, bracket_sl_order_id
@@ -852,7 +824,7 @@ class MartingaleManager:
                             )
                             
                             if close_res and (close_res.get('state') in ['closed', 'filled'] or close_res.get('id')):
-                                logger.info(f"Close order successful on attempt {attempt + 1}: {close_res.get('id')}")
+                                logger.info(f" Close order successful on attempt {attempt + 1}: {close_res.get('id')}")
                                 close_order_success = True
                                 break
                             else:
@@ -890,14 +862,7 @@ class MartingaleManager:
                         
                         if fake_loss_amount >= fake_loss_amount_maxlimit:
                             logger.info(f"Fake loss limit reached: ${fake_loss_amount:.2f} >= ${fake_loss_amount_maxlimit}")
-                            # Check if SL cycle has started to determine fake loss behavior
-                            if martingale_manager.sl_cycle_started:
-                                # SL cycle has started - set fake loss flag instead of incrementing level
-                                martingale_manager.fake_loss_flag = True
-                                logger.info(f"Fake loss limit reached during SL cycle - flag set for elevated start")
-                            else:
-                                # No SL cycle - allow fake loss to increment level
-                                martingale_manager.update_trade_result('loss', is_fake_trigger=True)
+                            martingale_manager.update_trade_result('loss', is_fake_trigger=True)
                             fake_loss_amount = 0
                             print(f"New leverage: {martingale_manager.get_leverage()}x")
                     
@@ -1218,20 +1183,12 @@ def fake_trade_loss_checker(df, current_time):
                         logger.info(f"Fake Loss amount is ${fake_loss_amount}") # code added
                         print(f"Max limit: ${fake_loss_amount_maxlimit}")
 
-                        # NEW: Use fake loss flag system based on SL cycle state
+                        # NEW: Use double-trigger prevention system
                         if fake_loss_amount >= fake_loss_amount_maxlimit:
                             print("FAKE LOSS LIMIT REACHED!")
-                            # Check if SL cycle has started to determine fake loss behavior
-                            if martingale_manager.sl_cycle_started:
-                                # SL cycle has started - set fake loss flag instead of incrementing level
-                                martingale_manager.fake_loss_flag = True
-                                logger.info(f"Fake loss limit reached during SL cycle - flag set for elevated start")
-                                print(f"  Fake loss flag set for elevated start")
-                            else:
-                                # No SL cycle - allow fake loss to increment level
-                                martingale_manager.update_trade_result('loss', is_fake_trigger=True)
-                                print(f"  New leverage: {martingale_manager.get_leverage()}x")
+                            martingale_manager.update_trade_result('loss', is_fake_trigger=True)
                             fake_loss_amount = 0  # Reset fake loss tracking
+                            print(f"  New leverage: {martingale_manager.get_leverage()}x")
 
                         # Reset trade tracking
                         reset_trade_tracking()
@@ -1607,120 +1564,10 @@ def calculate_signals(df):
     except Exception as e:
         print(f"Error occured in calculating the signal : {e}")
 
-# def test_martingale_scenarios():
-#     """Test function to verify martingale behavior according to the 14 test cases"""
-#     print("=" * 80)
-#     print("TESTING ALL 14 MARTINGALE SCENARIOS")
-#     print("=" * 80)
-    
-#     import time
-    
-#     # Test Case 1: SL -> fake loss limit -> SL -> SL -> Win -> 20x (elevated start)
-#     print("\nCASE 1: SL -> fake loss limit -> SL -> SL -> Win -> 20x")
-#     test1 = MartingaleManager(1000, 10)
-#     print(f"Initial: Level {test1.current_level}, Leverage {test1.get_leverage()}x")
-    
-#     test1.update_trade_result('loss', is_fake_trigger=False)  # SL
-#     print(f"After SL: Level {test1.current_level}, Leverage {test1.get_leverage()}x")
-    
-#     # Simulate fake loss limit reached during SL cycle
-#     test1.fake_loss_flag = True
-#     print(f"Fake loss limit reached, flag set: {test1.fake_loss_flag}")
-    
-#     test1.update_trade_result('loss', is_fake_trigger=False)  # SL
-#     print(f"After SL: Level {test1.current_level}, Leverage {test1.get_leverage()}x")
-    
-#     test1.update_trade_result('loss', is_fake_trigger=False)  # SL
-#     print(f"After SL: Level {test1.current_level}, Leverage {test1.get_leverage()}x")
-    
-#     test1.update_trade_result('win', is_fake_trigger=False)  # Win
-#     print(f"After Win: Level {test1.current_level}, Leverage {test1.get_leverage()}x")
-#     print(f"Expected: Level 0, Leverage 20x (elevated start) [PASS]")
-    
-#     print("\n" + "=" * 60)
-    
-#     # Test Case 2: fake loss limit (no SL) -> Win -> 10x
-#     print("\nCASE 2: fake loss limit (no SL) -> Win -> 10x")
-#     test2 = MartingaleManager(1000, 10)
-#     print(f"Initial: Level {test2.current_level}, Leverage {test2.get_leverage()}x")
-    
-#     test2.update_trade_result('loss', is_fake_trigger=True)  # fake loss
-#     print(f"After fake loss: Level {test2.current_level}, Leverage {test2.get_leverage()}x")
-    
-#     test2.update_trade_result('win', is_fake_trigger=False)  # Win
-#     print(f"After Win: Level {test2.current_level}, Leverage {test2.get_leverage()}x")
-#     print(f"Expected: Level 0, Leverage 10x (base) [PASS]")
-    
-#     print("\n" + "=" * 60)
-    
-#     # Test Case 3: double trigger -> SL -> SL -> SL -> Win -> 10x (no elevated start)
-#     print("\nCASE 3: double trigger -> SL -> SL -> SL -> Win -> 10x")
-#     test3 = MartingaleManager(1000, 10)
-#     print(f"Initial: Level {test3.current_level}, Leverage {test3.get_leverage()}x")
-    
-#     # Double trigger
-#     test3.update_trade_result('loss', is_fake_trigger=True)
-#     test3.last_loss_timestamp = time.time() - 5
-#     test3.last_loss_type = 'fake'
-#     test3.update_trade_result('loss', is_fake_trigger=False)
-#     print(f"After double trigger: Level {test3.current_level}, Leverage {test3.get_leverage()}x")
-    
-#     test3.update_trade_result('loss', is_fake_trigger=False)  # SL
-#     print(f"After SL: Level {test3.current_level}, Leverage {test3.get_leverage()}x")
-    
-#     test3.update_trade_result('loss', is_fake_trigger=False)  # SL
-#     print(f"After SL: Level {test3.current_level}, Leverage {test3.get_leverage()}x")
-    
-#     test3.update_trade_result('loss', is_fake_trigger=False)  # SL
-#     print(f"After SL: Level {test3.current_level}, Leverage {test3.get_leverage()}x")
-    
-#     test3.update_trade_result('win', is_fake_trigger=False)  # Win
-#     print(f"After Win: Level {test3.current_level}, Leverage {test3.get_leverage()}x")
-#     print(f"Expected: Level 0, Leverage 10x (base, no elevated start) [PASS]")
-    
-#     print("\n" + "=" * 60)
-    
-#     # Test Case 4: double trigger -> fake loss limit -> SL -> Win -> 20x -> SL -> Win -> 10x
-#     print("\nCASE 4: double trigger -> fake loss limit -> SL -> Win -> 20x -> SL -> Win -> 10x")
-#     test4 = MartingaleManager(1000, 10)
-#     print(f"Initial: Level {test4.current_level}, Leverage {test4.get_leverage()}x")
-    
-#     # Double trigger
-#     test4.update_trade_result('loss', is_fake_trigger=True)
-#     test4.last_loss_timestamp = time.time() - 5
-#     test4.last_loss_type = 'fake'
-#     test4.update_trade_result('loss', is_fake_trigger=False)
-#     print(f"After double trigger: Level {test4.current_level}, Leverage {test4.get_leverage()}x")
-    
-#     # Fake loss limit reached during SL cycle
-#     test4.fake_loss_flag = True
-#     print(f"Fake loss limit reached, flag set: {test4.fake_loss_flag}")
-    
-#     test4.update_trade_result('loss', is_fake_trigger=False)  # SL
-#     print(f"After SL: Level {test4.current_level}, Leverage {test4.get_leverage()}x")
-    
-#     test4.update_trade_result('win', is_fake_trigger=False)  # Win
-#     print(f"After Win: Level {test4.current_level}, Leverage {test4.get_leverage()}x")
-#     print(f"Expected: Level 0, Leverage 20x (elevated start) [PASS]")
-    
-#     test4.update_trade_result('loss', is_fake_trigger=False)  # SL
-#     print(f"After SL: Level {test4.current_level}, Leverage {test4.get_leverage()}x")
-    
-#     test4.update_trade_result('win', is_fake_trigger=False)  # Win
-#     print(f"After Win: Level {test4.current_level}, Leverage {test4.get_leverage()}x")
-#     print(f"Expected: Level 0, Leverage 10x (back to base) [PASS]")
-    
-#     print("\n" + "=" * 80)
-#     print("ALL 14 TEST CASES VERIFIED [PASS]")
-#     print("=" * 80)
-
 if __name__ == "__main__":
-    # Run martingale test scenarios first
-    # test_martingale_scenarios()
-    
-    res = delta_client.get_usd_balance()
-    print(res)
-    exit(0)
+    # res = delta_client.get_usd_balance()
+    # print(res)
+    # exit(0)
     try:
         print("Starting Delta Exchange Trading Bot with Bracket Orders")
         print(f"Initial Capital: Rs{base_capital}")
@@ -1729,7 +1576,7 @@ if __name__ == "__main__":
         print(f"Interval: {DELTA_INTERVAL}")
         print(f"TP PERCENT: {DELTA_TP_PERCENT}")
         print(f"SL BUFFER POINTS: {DELTA_SL_BUFFER_POINTS}")
-        logger.info(f"The trading bot has started with initial capital {base_capital} and initial leverage {base_leverage} and symbol {DELTA_SYMBOL} and interval {DELTA_INTERVAL} with tp percent {DELTA_TP_PERCENT} and sl points {DELTA_SL_BUFFER_POINTS} current fake loss amount is {fake_loss_amount} and current martingale level is {martingale_manager.current_level} with fake loss threshold {DELTA_FAKE_LOSS_MAX_AMOUNT} on timeframe {BYBIT_INTERVAL} with heikan-ashi status as {MASTER_HEIKEN_CHOICE} with N-candle lookback of {N_CANDLE_LOOKBACK}")
+        logger.info(f"The trading bot has started with initial capital {base_capital} and initial leverage {base_leverage} and symbol {DELTA_SYMBOL} and interval {DELTA_INTERVAL} with tp percent {DELTA_TP_PERCENT} and sl points {DELTA_SL_BUFFER_POINTS} current fake loss amount is {fake_loss_amount} and current martingale level is {martingale_manager.current_level} with fake loss threshold {DELTA_FAKE_LOSS_MAX_AMOUNT} on timeframe {BYBIT_INTERVAL} with heikan-ashi status as {MASTER_HEIKEN_CHOICE}")
         print("=" * 50)
         
         # Set initial leverage
@@ -1977,11 +1824,11 @@ if __name__ == "__main__":
                     print(f"Error displaying status: {status_e}")
                 
                 # Sleep between cycles
-                print(f" Sleeping for {2} seconds...")
-                time.sleep(2)
+                print(f" Sleeping for {1} seconds...")
+                time.sleep(1)
             else:
                 print("Outside trading hours, sleeping...")
-                time.sleep(2)
+                time.sleep(1)
                 
         except KeyboardInterrupt:
             print("\n" + "="*50)
@@ -1992,5 +1839,5 @@ if __name__ == "__main__":
             break
         except Exception as e:
             print(f" Error in main loop: {e}") 
-            time.sleep(2)
+            time.sleep(1)
             continue
